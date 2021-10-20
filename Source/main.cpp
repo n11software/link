@@ -40,8 +40,14 @@ void* thread(void* arg) {
           location = locationParser(location);
           if (location.substr(location.find(".")+1) == "html") {
             type = "text/html";
-          } else {
+          } else if (location.substr(location.find(".")+1) == "css") {
+            type = "text/css";
+          } else if (location.substr(location.find(".")+1) == "csv") {
+            type = "text/csv";
+          } else if (location.substr(location.find(".")+1) == "ico") {
             type = "image/x-icon";
+          } else {
+            type = "text/plain";
           }
         } else if (line.substr(0,1) == "H") {
           std::cout << "Head ";
