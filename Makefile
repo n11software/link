@@ -3,6 +3,6 @@ all: build run
 
 build:
 	g++ Source/main.cpp -o Build/main.o -pthread
-
+	
 run:
-	./Build/main.o -d Public/ -p 3000 -t 50
+	./Build/main.o

@@ -11,11 +11,12 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <fstream>
+#include "Link.hpp"
+#include "Config.hpp"
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 char msg[1000];
-std::string args[3];
 
 std::string locationParser(std::string location) {
   if (location.find(".") == std::string::npos) {
@@ -74,17 +75,25 @@ void* thread(void* arg) {
     }
   }
 
+  std::cout << req << std::endl;
+
   std::string data;
   pthread_mutex_lock(&lock); {
     std::string line;
-    std::ifstream file(args[0] + location, std::fstream::binary);
+    std::ifstream file(config.getDirectory() + location, std::fstream::binary);
     if (file.is_open()) {
       while (std::getline(file, line)) {
         data += line + '\n';
       }
       status = "200";
     } else {
-      data = "404 File Not Found!";
+      std::ifstream file404(config.getDirectory() + "404.html", std::fstream::binary);
+      if (file404.is_open()) {
+        line="";
+        while (std::getline(file404, line)) {
+          data += line + '\n';
+        }
+      } else data = "404 File Not Found!";
       status = "404";
     }
     file.close();
@@ -99,44 +108,29 @@ void* thread(void* arg) {
 }
 
 int main(int argc, char *argv[]) {
-  for (uint16_t i=0;i<=argc;i++) {
-    if (argc > i && strcmp(argv[i], "-d") == 0) {
-      args[0] = argv[i+1];
-    } else if (argc > i && strcmp(argv[i], "-p") == 0) {
-      args[1] = argv[i+1];
-      if (!std::regex_match(args[1], std::regex("^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"))) {
-        std::cout << "Please specify a valid port!" << std::endl;
-        return 1;
-      }
-    } else if (argc > i && strcmp(argv[i], "-t") == 0) {
-      args[2] = argv[i+1];
-      if (!strspn(args[2].c_str(), "0123456789") == args[2].size()) {
-        std::cout << "Please specify a valid amount of threads!" << std::endl;
-      }
-    }
-  }
+  config = Config("/etc/Link/config");
   int serverSocket, newSocket;
   struct sockaddr_in serverAddr;
   struct sockaddr_storage serverStorage;
   socklen_t addr_size;
   serverSocket = socket(PF_INET, SOCK_STREAM, 0);
   serverAddr.sin_family = AF_INET;
-  serverAddr.sin_port = htons(std::stoi(args[1]));
+  serverAddr.sin_port = htons(config.getPort());
   serverAddr.sin_addr.s_addr = INADDR_ANY;
   memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
   bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-  if (listen(serverSocket, std::stoi(args[2])) == 0) printf("Listening\n");
+  if (listen(serverSocket, config.getThreads()) == 0) printf("Listening\n");
   else
     printf("Error\n");
-    pthread_t tid[std::stoi(args[2])+10];
+    pthread_t tid[config.getThreads()+10];
     int i = 0;
     while(1) {
       addr_size = sizeof serverStorage;
       newSocket = accept(serverSocket, (struct sockaddr*) &serverStorage, &addr_size);
       if (pthread_create(&tid[i++], NULL, thread, &newSocket) != 0) printf("Failed to create thread\n");
-      if( i >= std::stoi(args[2])) {
+      if( i >= config.getThreads()) {
         i = 0;
-        while(i < std::stoi(args[2])) pthread_join(tid[i++],NULL);
+        while(i < config.getThreads()) pthread_join(tid[i++],NULL);
         i = 0;
       }
     }
