@@ -31,21 +31,26 @@ class Config {
           for (int i = 0;i<v.size();i+=1) {
             if (v[i] == "DocumentRoot") directory = v[i+1];
             if (v[i] == "Port") port = std::stoi(v[i+1]);
-            if (v[i] == "Threads") threads = std::stoi(v[i+1]);
+            if (v[i] == "HTTPThreads") HTTPThreads = std::stoi(v[i+1]);
+            if (v[i] == "HTTPSThreads") HTTPSThreads = std::stoi(v[i+1]);
+            if (v[i] == "LobbyThreads") LobbyThreads = std::stoi(v[i+1]);
           }
         }
         file.close();
       } else {
         std::cout << "The config file does not exist please create it!" << std::endl;
+        std::exit(1);
       }
     }
     std::string getData() { return this->data; }
     std::string getDirectory() { return this->directory; }
     int getPort() { return port; }
-    int getThreads() { return this->threads; }
+    int getHTTPThreads() { return this->HTTPThreads; }
+    int getHTTPSThreads() { return this->HTTPSThreads; }
+    int getLobbyThreads() { return this->LobbyThreads; }
   private:
     std::string data, directory;
-    int port, threads;
+    int port, HTTPThreads, HTTPSThreads, LobbyThreads;
 };
 
 Config config;

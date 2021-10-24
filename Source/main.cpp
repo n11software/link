@@ -108,7 +108,7 @@ void* thread(void* arg) {
 }
 
 int main(int argc, char *argv[]) {
-  config = Config("/etc/Link/config");
+  config = Config("config");
   int serverSocket, newSocket;
   struct sockaddr_in serverAddr;
   struct sockaddr_storage serverStorage;
@@ -119,18 +119,18 @@ int main(int argc, char *argv[]) {
   serverAddr.sin_addr.s_addr = INADDR_ANY;
   memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
   bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-  if (listen(serverSocket, config.getThreads()) == 0) printf("Listening\n");
+  if (listen(serverSocket, config.getHTTPThreads()) == 0) printf("Listening\n");
   else
     printf("Error\n");
-    pthread_t tid[config.getThreads()+10];
+    pthread_t tid[config.getHTTPThreads()+config.getLobbyThreads()];
     int i = 0;
     while(1) {
       addr_size = sizeof serverStorage;
       newSocket = accept(serverSocket, (struct sockaddr*) &serverStorage, &addr_size);
       if (pthread_create(&tid[i++], NULL, thread, &newSocket) != 0) printf("Failed to create thread\n");
-      if( i >= config.getThreads()) {
+      if( i >= config.getHTTPThreads()) {
         i = 0;
-        while(i < config.getThreads()) pthread_join(tid[i++],NULL);
+        while(i < config.getHTTPThreads()) pthread_join(tid[i++],NULL);
         i = 0;
       }
     }
