@@ -1,5 +1,0 @@
-DocumentRoot = /home/fire/GitHub/Link/Public/
-Port = 3000
-HTTPThreads = 50
-HTTPSThreads = 50
-LobbyThreads = 10

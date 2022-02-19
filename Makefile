@@ -1,8 +1,15 @@
-all: build run
-.PHONY: build
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
-build:
-	g++ Source/main.cpp -o Build/main.o -pthread
-	
+CPPSourceCode = $(call rwildcard,Source,*.cpp)
+Objects = $(patsubst Source/%.cpp, Build/%.o, $(CPPSourceCode))
+Directories = $(wildcard Source/*)
+
+Build/%.o: Source/%.cpp
+	@mkdir -p $(@D)
+	@g++ -c $^ -std=c++2a -o $@
+
+Link: $(Objects)
+	@g++ $(Objects) -std=c++2a -o Link
+
 run:
-	./Build/main.o
+	@./Link
