@@ -6,10 +6,10 @@ Directories = $(wildcard Source/*)
 
 Build/%.o: Source/%.cpp
 	@mkdir -p $(@D)
-	@g++ -c $^ -std=c++2a -o $@
+	@g++ -c $^ -std=c++2a -pthread -o $@
 
 Link: $(Objects)
-	@g++ $(Objects) -std=c++2a -o Link
+	@g++ $(Objects) -std=c++2a -pthread -o Link
 
 run:
 	@./Link

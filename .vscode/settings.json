@@ -59,6 +59,9 @@
     "streambuf": "cpp",
     "thread": "cpp",
     "cinttypes": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "set": "cpp",
+    "unordered_set": "cpp",
+    "variant": "cpp"
   }
 }
