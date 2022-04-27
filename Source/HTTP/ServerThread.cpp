@@ -21,9 +21,15 @@ void* ConnectionHandler(void* arg) {
   HTTP::ClientData* Data = (HTTP::ClientData*)arg;
   char msg[1000];
   Headers* req = new Headers(Data->getSocket());
+  Headers* res = new Headers(Data->getSocket());
   recv(Data->getSocket(), msg, 1000, 0);
-  std::string res = "";
-  write(Data->getSocket(), res.data(), res.size());
+  req->SetRequest(msg);
+  res->SetStatus("200 OK");
+  std::string msgString(msg);
+  std::string path = msgString.substr(0, msgString.find("\n")-10);
+  if (path.substr(0,1) == "G") path = path.substr(5, path.length());
+  if (path == "") path = "index.html";
+  res->SendFile("www/" + path);
   close(Data->getSocket());
   pthread_exit(NULL);
   return NULL;
@@ -52,12 +58,18 @@ void run(void* arg) {
   fprintf(stdout, "[HTTP][#] Listening on port %d\n", ServerThread->getPort());
   pthread_t ThreadID[ServerThread->getMaxConnections()+ServerThread->getMaxQueuedConnections()];
   int CurrentThread = 0;
-  while (true) {
+  while (ServerThread->isRunning()) {
     AddressSize = sizeof(ServerStorage);
     ClientSocket = accept(ServerSocket, (struct sockaddr*)&ServerStorage, &AddressSize);
     HTTP::ClientData ClientData(ServerThread, ClientSocket);
     pthread_create(&ThreadID[CurrentThread++], NULL, ConnectionHandler, &ClientData);
+    if (CurrentThread >= ServerThread->getMaxQueuedConnections()) {
+      CurrentThread = 0;
+      while (CurrentThread < ServerThread->getMaxQueuedConnections()) pthread_join(ThreadID[CurrentThread++], NULL);
+    }
   }
+  shutdown(ServerSocket, SHUT_RDWR);
+  pthread_exit(NULL);
 }
 
 namespace HTTP {
@@ -67,10 +79,11 @@ namespace HTTP {
    * @param port The port to listen on.
    * @param maxConnections The maximum number of connections to accept.
    */
-  ServerThread::ServerThread(int port, int maxConnections, int maxQueuedConnections) {
+  ServerThread::ServerThread(int port, int maxConnections, int maxQueuedConnections, bool* Running) {
     this->port = port;
     this->maxConnections = maxConnections;
     this->maxQueuedConnections = maxQueuedConnections;
+    this->Running = Running;
     std::thread Thread = std::thread(run, (void*)this);
     Thread.join();
   }
@@ -100,6 +113,15 @@ namespace HTTP {
    */
   int ServerThread::getMaxQueuedConnections() {
     return this->maxQueuedConnections;
+  }
+
+  /*
+   * Gets if the main thread is still running.
+   *
+   * @return True if the main thread is still running.
+   */
+  bool ServerThread::isRunning() {
+    return this->Running;
   }
 
   /*

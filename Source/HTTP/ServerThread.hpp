@@ -6,10 +6,12 @@
 namespace HTTP {
   class ServerThread {
     public:
-      ServerThread(int port, int maxConnections, int maxQueuedConnections);
+      ServerThread(int port, int maxConnections, int maxQueuedConnections, bool* Running);
       int getPort(), getMaxConnections(), getMaxQueuedConnections();
+      bool isRunning();
     private:
       int port, maxConnections, maxQueuedConnections;
+      bool* Running;
   };
 
   class ClientData {
