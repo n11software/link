@@ -1,4 +1,4 @@
-let ChangeTo = (url) => {
+let Route = (url) => {
   let HTTP = new XMLHttpRequest()
   HTTP.open('GET', url)
   HTTP.send()
