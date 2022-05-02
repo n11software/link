@@ -28,7 +28,7 @@ void* ConnectionHandler(void* arg) {
   std::string msgString(msg);
   std::string path = msgString.substr(0, msgString.find("\n")-10);
   if (path.substr(0,1) == "G") path = path.substr(5, path.length());
-  if (path == "") path = "index.html";
+  if (path == "") path = "index";
   res->SendFile("www/" + path);
   close(Data->getSocket());
   pthread_exit(NULL);

@@ -38,8 +38,10 @@ void Headers::SendFile(std::string FilePath) {
   std::ifstream File(FilePath);
   if (File.is_open()) {
     std::string extension = FilePath.substr(FilePath.find_last_of(".") + 1);
-    if (extension == "html") ResponseHeaders = "Content-Type: text/html";
-    else if (extension == "css") ResponseHeaders = "Content-Type: text/css";
+    if (extension == "html") {
+      this->SetStatus("404 Not Found");
+      this->Send("<h1>404 Not Found</h1>");
+    } else if (extension == "css") ResponseHeaders = "Content-Type: text/css";
     else if (extension == "js") ResponseHeaders = "Content-Type: text/javascript";
     else if (extension == "png") ResponseHeaders = "Content-Type: image/png";
     else if (extension == "jpg") ResponseHeaders = "Content-Type: image/jpeg";
@@ -65,8 +67,14 @@ void Headers::SendFile(std::string FilePath) {
     std::string FileContents((std::istreambuf_iterator<char>(File)), std::istreambuf_iterator<char>());
     this->Send(FileContents);
   } else {
-    this->SetStatus("404 Not Found");
-    this->Send("<h1>404 Not Found</h1>");
+    std::ifstream Backup(FilePath+".html");
+    if (Backup.is_open()) {
+      std::string FileContents((std::istreambuf_iterator<char>(Backup)), std::istreambuf_iterator<char>());
+      this->Send(FileContents);
+    } else {
+      this->SetStatus("404 Not Found");
+      this->Send("<h1>404 Not Found</h1>");
+    }
   }
 }
 
