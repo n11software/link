@@ -1,10 +1,88 @@
-.center {
+.navbar {
   display: flex;
-  justify-content: center;
+  z-index: 10;
+  padding: 1rem 0.5rem;
+  background-color: #fff;
+  user-select: none;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
   align-items: center;
-  height: 100%;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  top: 1rem;
+  right: 1rem;
+  left: 1rem;
+  border-radius: 0.75rem;
 }
 
-.button {
-  font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+.navbar .main {
+  display: flex;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .navbar .main .logo {
+    display: block;
+  }
+}
+
+.navbar .main .logo {
+  display: hidden;
+  width: 3rem;
+}
+
+.navbar .main .logo {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .navbar .main .main-button {
+    display: none;
+  }
+}
+
+.navbar .main .main-button {
+  display: block;
+  cursor: pointer;
+  margin: auto 0.5rem;
+  align-items: center;
+  margin: auto 0.5rem;
+  border-radius: 0.5rem;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  color: rgb(31 41 55);
+  background-color: rgb(214 211 209);
+}
+
+.navbar .main .menu-button svg {
+  width: 1.5rem;
+}
+
+.navbar .right {
+  display: flex;
+  justify-items: flex-end;
+  text-align: right;
+  width: 100%;
+}
+
+.navbar .right .apply {
+  display: flex;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: Arial, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  text-decoration: none;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  align-items: center;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: 0;
+  color: rgb(229 231 235);
 }

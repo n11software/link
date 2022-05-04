@@ -23,9 +23,14 @@ void* ConnectionHandler(void* arg) {
   Headers* req = new Headers(Data->getSocket());
   Headers* res = new Headers(Data->getSocket());
   recv(Data->getSocket(), msg, 1000, 0);
+  std::string msgString(msg);
+  if (msgString.substr(0, 5) != "GET /" && msgString.substr(0, 6) != "POST /") {
+    close(Data->getSocket());
+    pthread_exit(NULL);
+    return NULL;
+  }
   req->SetRequest(msg);
   res->SetStatus("200 OK");
-  std::string msgString(msg);
   std::string path = msgString.substr(0, msgString.find("\n")-10);
   if (path.substr(0,1) == "G") path = path.substr(5, path.length());
   if (path == "") path = "index";
