@@ -1,22 +1,40 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>N11</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="js/router.js"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <script src="js/navbar.js"></script>
+    <script src="js/products.js"></script>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/products.css">
   </head>
   <body>
-    <div class="navbar" id="navbar">
+    <div class="navbar normal" id="navbar">
       <div class="main">
         <a href="/" class="logo">
           <img src="/icon.svg" alt="N11">
         </a>
-        <a class="menu-button" onclick="toggleMenu(!menuOpen)" id="menu-button">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </a>
-        <div class="menu" id="menu">
-
+        <div class="buttons">
+          <a class="button" onclick="setIsOpen(!isProductsOpen, 0)" id="products-button">
+            <span>Products</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </a>
+          <a class="button" onclick="setIsOpen(!isEmployeesOpen, 1)" id="employees-button">
+            <span>Employees</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </a>
+          <a class="button" onclick="Route('/donate')">
+            <span>Donate</span>
+          </a>
+          <a class="button" onclick="Route('/contact')">
+            <span>Contact</span>
+          </a>
         </div>
       </div>
       <div class="right">
@@ -24,6 +42,9 @@
           Apply
         </a>
       </div>
+    </div>
+    <div style="height: 200vh; padding-top: 4rem">
+      test
     </div>
   </body>
 </html>
