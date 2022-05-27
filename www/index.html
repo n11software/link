@@ -9,12 +9,13 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/products.css">
+    <link rel="stylesheet" href="css/lazyimage.css">
   </head>
   <body>
     <div class="navbar normal" id="navbar">
       <div class="main">
         <a href="/" class="logo">
-          <img src="/icon.svg" alt="N11">
+          <img src="/icon.svg" id="logo">
         </a>
         <div class="buttons">
           <a class="button" onclick="setIsOpen(!isProductsOpen, 0)" id="products-button">
@@ -46,5 +47,6 @@
     <div style="height: 200vh; padding-top: 4rem">
       test
     </div>
+    <script src="js/lazyimage.js"></script>
   </body>
 </html>

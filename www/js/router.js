@@ -4,6 +4,6 @@ let Route = (url) => {
   HTTP.send()
   HTTP.onreadystatechange = error => {
     document.querySelector('html').innerHTML=(HTTP.responseText)
-    window.history.pushState('', '', url);
+    window.history.pushState(null, '', url);
   }
 }
