@@ -13,7 +13,7 @@ namespace Log {
       if (level == "Debug" && DebugMode) std::cout << "Debug > " << Message << std::endl;
       else if (level != "Debug") std::cout << level << " > " << Message << std::endl;
     }
-    if (SaveLogs && (level != "Debug" && !DebugMode)) {
+    if (SaveLogs && (level != "Debug" || DebugMode)) {
       std::ofstream Log(LogFile, std::ios::app);
       if (Log.is_open() && Log.good()) {
         Log << level << " > " << Message << std::endl;
