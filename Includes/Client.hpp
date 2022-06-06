@@ -14,6 +14,7 @@ class Client {
     char Buffer[1024] = { 0 };
 };
 
+void InitializeDatabase();
 void* ClientHandler(void* arg);
 
 #endif

@@ -8,10 +8,10 @@ namespace Log {
   std::string LogFile = "";
 
   void Log(std::string level, std::string Message) {
-    if (level == "Error") fprintf(stderr, "%s > %s\n", level.c_str(), Message.c_str());
+    if (level == "Error") fprintf(stderr, "\033[31m%s > \033[0m%s\n", level.c_str(), Message.c_str());
     else {
-      if (level == "Debug" && DebugMode) std::cout << "Debug > " << Message << std::endl;
-      else if (level != "Debug") std::cout << level << " > " << Message << std::endl;
+      if (level == "Debug" && DebugMode) std::cout << "\033[33mDebug > \033[0m" << Message << std::endl;
+      else if (level != "Debug") std::cout << "\033[35m" << level << " > \033[0m" << Message << std::endl;
     }
     if (SaveLogs && (level != "Debug" || DebugMode)) {
       std::ofstream Log(LogFile, std::ios::app);

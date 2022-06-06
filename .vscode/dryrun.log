@@ -1,7 +1,5 @@
-make.exe --dry-run --always-make --keep-going --print-directory
-'\\wsl.localhost\Ubuntu-22.04\home\fire\Link'
-CMD.EXE was started with the above path as the current directory.
-UNC paths are not supported.  Defaulting to Windows directory.
-'make.exe' is not recognized as an internal or external command,
-operable program or batch file.
-
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/fire/Link'
+make: 'Link' is up to date.
+make: Leaving directory '/home/fire/Link'
+ 

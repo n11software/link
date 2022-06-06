@@ -9,7 +9,7 @@ Build/%.o: Source/%.cpp
 	@g++ -c $^ -std=c++2a -pthread -o $@
 
 Link: $(Objects)
-	@g++ $(Objects) -std=c++2a -lz -pthread -o Link
+	@g++ $(Objects) -std=c++2a -l mysqlcppconn -pthread -o Link
 
 run:
 	@./Link
