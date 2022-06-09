@@ -18,12 +18,12 @@
 #include <cstring>
 #include <chrono>
 #include <vector>
-#include <mysql_driver.h>
-#include <mysql_connection.h>
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
+#include "../Includes/mysql_driver.h"
+#include "../Includes/mysql_connection.h"
+#include "../Includes/cppconn/driver.h"
+#include "../Includes/cppconn/exception.h"
+#include "../Includes/cppconn/resultset.h"
+#include "../Includes/cppconn/statement.h"
 #include "../Includes/SHA512.hpp"
 #include "../Includes/Log.hpp"
 

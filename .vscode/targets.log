@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Jun  5 14:35:56 2022
+# Make data base, printed on Thu Jun  9 10:45:51 2022
 
 # Variables
 
@@ -35,7 +35,9 @@ PWD = /home/fire/Link
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
-XDG_DATA_DIRS = /usr/local/share:/usr/share:/var/lib/snapd/desktop
+LSCOLORS = Gxfxcxdxbxegedabagacad
+# environment
+OLDPWD = /mnt/c/Users/fire/AppData/Local/Programs/Microsoft VS Code
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # environment
@@ -55,9 +57,7 @@ CURDIR := /home/fire/Link
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
-# environment
-LESSOPEN = | /usr/bin/lesspipe %s
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -72,6 +72,8 @@ WAYLAND_DISPLAY = wayland-0
 MAKEFILE_LIST := Makefile
 # automatic
 @F = $(notdir $@)
+# environment
+ZSH = /home/fire/.oh-my-zsh
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # automatic
@@ -97,15 +99,13 @@ MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /home/fire/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Program Files/Oculus/Support/oculus-runtime:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/nodejs/:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/Nginx:/mnt/c/Program Files (x86)/sox-14-4-2:/mnt/c/Program Files (x86)/FFAIO/bin:/mnt/c/Users/fire/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/fire/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/fire/AppData/Roaming/npm:/mnt/c/Users/fire/AppData/Local/GitHubDesktop/bin:/snap/bin
+PATH = /home/fire/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Program Files/Oculus/Support/oculus-runtime:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/nodejs/:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/Nginx:/mnt/c/Program Files (x86)/sox-14-4-2:/mnt/c/Program Files (x86)/FFAIO/bin:/mnt/c/Users/fire/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/fire/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/fire/AppData/Roaming/npm:/mnt/c/Users/fire/AppData/Local/GitHubDesktop/bin
 # default
 MAKEFILES := 
 # automatic
 ^F = $(notdir $^)
 # environment
 VSCODE_LOG_NATIVE = false
-# environment
-LESSCLOSE = /usr/bin/lesspipe %s %s
 # automatic
 ?F = $(notdir $?)
 # environment
@@ -117,7 +117,9 @@ LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:
 # automatic
 +F = $(notdir $+)
 # environment
-WSL_INTEROP = /run/WSL/5033_interop
+LESS = -R
+# environment
+WSL_INTEROP = /run/WSL/18400_interop
 # 'override' directive
 GNUMAKEFLAGS := 
 # environment
@@ -137,13 +139,15 @@ VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 # makefile (from 'Makefile', line 3)
 CPPSourceCode = $(call rwildcard,Source,*.cpp)
 # environment
+PAGER = less
+# environment
 _ = /home/fire/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/node
 # environment
 XDG_RUNTIME_DIR = /mnt/wslg/runtime-dir
 # makefile (from 'Makefile', line 5)
 Directories = $(wildcard Source/*)
 # environment
-VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-ebc9d71e-21ab-40b7-9a08-f8df846866bd.sock
+VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-4b56e9be-98b5-4285-b9b9-512df161594d.sock
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
@@ -163,7 +167,7 @@ WSL_DISTRO_NAME = Ubuntu-22.04
 # makefile (from 'Makefile', line 1)
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 # variable set hash-table stats:
-# Load=75/1024=7%, Rehash=0, Collisions=2/115=2%
+# Load=77/1024=8%, Rehash=0, Collisions=2/119=2%
 
 # Pattern-specific Variable Values
 
@@ -172,12 +176,13 @@ rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(
 # Directories
 
 # Source/Log.cpp (device 2080, inode 155179): could not be opened.
-# . (device 2080, inode 83967): 13 files, no impossibilities.
+# . (device 2080, inode 83967): 14 files, no impossibilities.
+# Source/SHA512.cpp (device 2080, inode 234626): could not be opened.
 # Source/main.cpp (device 2080, inode 154919): could not be opened.
 # Source/Client.cpp (device 2080, inode 155732): could not be opened.
-# Source (device 2080, inode 154914): 5 files, no impossibilities.
+# Source (device 2080, inode 154914): 6 files, no impossibilities.
 
-# 18 files, no impossibilities in 5 directories.
+# 20 files, no impossibilities in 6 directories.
 
 # Implicit Rules
 
@@ -188,6 +193,12 @@ Build/%.o: Source/%.cpp
 
 # 1 implicit rules, 0 (0.0%) terminal.
 # Files
+
+# Not a target:
+Build/SHA512.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 Makefile:
@@ -222,7 +233,7 @@ run:
 #  recipe to execute (from 'Makefile', line 15):
 	@./Link
 
-Link: Build/Client.o Build/Log.o Build/main.o
+Link: Build/Client.o Build/Log.o Build/SHA512.o Build/main.o
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -242,20 +253,19 @@ Build/main.o:
 #  File has not been updated.
 
 # files hash-table stats:
-# Load=9/1024=1%, Rehash=0, Collisions=0/22=0%
+# Load=10/1024=1%, Rehash=0, Collisions=0/24=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 30 / storage = 288 B / avg = 9 B
-# current buf: size = 8162 B / used = 288 B / count = 30 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 34 / storage = 336 B / avg = 9 B
+# current buf: size = 8162 B / used = 336 B / count = 34 / avg = 9 B
 
-# strcache performance: lookups = 40 / hit rate = 25%
+# strcache performance: lookups = 44 / hit rate = 22%
 # hash-table stats:
- 
-# Load=30/8192=0%, Rehash=0, Collisions=0/40=0%
-# Finished Make data base on Sun Jun  5 14:35:56 2022
+# Load=34/8192=0%, Rehash=0, Collisions=0/44=0%
+# Finished Make data base on Thu Jun  9 10:45:51 2022
 
  
