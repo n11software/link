@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Jun  9 10:45:51 2022
+# Make data base, printed on Thu Jun  9 11:13:46 2022
 
 # Variables
 
@@ -189,6 +189,7 @@ rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(
 Build/%.o: Source/%.cpp
 #  recipe to execute (from 'Makefile', line 8):
 	@mkdir -p $(@D)
+	@rm -r Build/*
 	@g++ -c $^ -std=c++2a -pthread -o $@
 
 # 1 implicit rules, 0 (0.0%) terminal.
@@ -203,7 +204,7 @@ Build/SHA512.o:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-05 14:35:54.792487746
+#  Last modified 2022-06-09 11:13:39.514065775
 #  File has been updated.
 #  Successfully updated.
 
@@ -230,15 +231,15 @@ run:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 15):
+#  recipe to execute (from 'Makefile', line 16):
 	@./Link
 
 Link: Build/Client.o Build/Log.o Build/SHA512.o Build/main.o
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 12):
-	@g++ $(Objects) -std=c++2a -l mysqlcppconn -pthread -o Link
+#  recipe to execute (from 'Makefile', line 13):
+	@g++ $(Objects) -std=c++2a -lmysqlcppconn -pthread -o Link
 
 # Not a target:
 Build/Client.o:
@@ -266,6 +267,6 @@ Build/main.o:
 # strcache performance: lookups = 44 / hit rate = 22%
 # hash-table stats:
 # Load=34/8192=0%, Rehash=0, Collisions=0/44=0%
-# Finished Make data base on Thu Jun  9 10:45:51 2022
+# Finished Make data base on Thu Jun  9 11:13:46 2022
 
  

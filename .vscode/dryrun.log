@@ -1,13 +1,5 @@
-make --dry-run --always-make --keep-going --print-directory
+make --dry-run --keep-going --print-directory
 make: Entering directory '/home/fire/Link'
-mkdir -p Build
-g++ -c Source/Client.cpp -std=c++2a -pthread -o Build/Client.o
-mkdir -p Build
-g++ -c Source/Log.cpp -std=c++2a -pthread -o Build/Log.o
-mkdir -p Build
-g++ -c Source/SHA512.cpp -std=c++2a -pthread -o Build/SHA512.o
-mkdir -p Build
-g++ -c Source/main.cpp -std=c++2a -pthread -o Build/main.o
-g++  Build/Client.o  Build/Log.o  Build/SHA512.o  Build/main.o -std=c++2a -l mysqlcppconn -pthread -o Link
+make: 'Link' is up to date.
 make: Leaving directory '/home/fire/Link'
  
