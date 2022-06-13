@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Jun  9 11:13:46 2022
+# Make data base, printed on Fri Jun 10 00:12:51 2022
 
 # Variables
 
@@ -57,7 +57,7 @@ CURDIR := /home/fire/Link
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -119,7 +119,7 @@ LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:
 # environment
 LESS = -R
 # environment
-WSL_INTEROP = /run/WSL/18400_interop
+WSL_INTEROP = /run/WSL/11_interop
 # 'override' directive
 GNUMAKEFLAGS := 
 # environment
@@ -147,7 +147,7 @@ XDG_RUNTIME_DIR = /mnt/wslg/runtime-dir
 # makefile (from 'Makefile', line 5)
 Directories = $(wildcard Source/*)
 # environment
-VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-4b56e9be-98b5-4285-b9b9-512df161594d.sock
+VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-977b8264-ac3b-459e-a73a-8c9bd382e703.sock
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
@@ -189,7 +189,6 @@ rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(
 Build/%.o: Source/%.cpp
 #  recipe to execute (from 'Makefile', line 8):
 	@mkdir -p $(@D)
-	@rm -r Build/*
 	@g++ -c $^ -std=c++2a -pthread -o $@
 
 # 1 implicit rules, 0 (0.0%) terminal.
@@ -204,7 +203,7 @@ Build/SHA512.o:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-09 11:13:39.514065775
+#  Last modified 2022-06-10 00:03:21.264176575
 #  File has been updated.
 #  Successfully updated.
 
@@ -231,14 +230,14 @@ run:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 16):
+#  recipe to execute (from 'Makefile', line 15):
 	@./Link
 
 Link: Build/Client.o Build/Log.o Build/SHA512.o Build/main.o
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 13):
+#  recipe to execute (from 'Makefile', line 12):
 	@g++ $(Objects) -std=c++2a -lmysqlcppconn -pthread -o Link
 
 # Not a target:
@@ -267,6 +266,6 @@ Build/main.o:
 # strcache performance: lookups = 44 / hit rate = 22%
 # hash-table stats:
 # Load=34/8192=0%, Rehash=0, Collisions=0/44=0%
-# Finished Make data base on Thu Jun  9 11:13:46 2022
+# Finished Make data base on Fri Jun 10 00:12:51 2022
 
  

@@ -18,6 +18,7 @@
 #include <cstring>
 #include <chrono>
 #include <vector>
+#include <bits/stdc++.h>
 #include <mysql_driver.h>
 #include <mysql_connection.h>
 #include <cppconn/driver.h>
@@ -26,6 +27,22 @@
 #include <cppconn/statement.h>
 #include "../Includes/SHA512.hpp"
 #include "../Includes/Log.hpp"
+
+
+
+
+
+
+// NOTE FOR LATER
+// BEFORE PRODUCTION THERE ARE MANY MANY EXPLOITS
+// PLEASE DO NOT USE THIS CODE IN PRODUCTION
+// FIX THESE EXPLOITS BEFORE PRODUCTION
+
+
+
+
+
+
 
 std::string HTTPDecode(std::string &SRC) {
   std::replace(SRC.begin(), SRC.end(), '+', ' ');
@@ -90,9 +107,34 @@ void Execute(std::string sql) {
   }
 }
 
-std::map<std::string, std::string> Headers;
+std::string SanitizeSQL(std::string value) {
+  std::string newValue = "";
+  for (int i=0; i<value.length(); i++) {
+    if (value[i] == '\'') newValue += "\\'";
+    else if (value[i] == '\\') newValue+="\\\\";
+    else newValue += value[i];
+  }
+  return newValue;
+}
+
+std::string CreateToken(std::string UUID, int Seed, std::string IP, std::string Browser, std::string OS) {
+  srand(time(0)*getpid()*Seed);
+  std::string Token = "";
+  for (int i = 0; i < 32; i++) Token += "0123456789abcdef"[rand() % 16];
+  std::string TimeDate;
+  time_t rawtime;
+  struct tm * timeinfo;
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  char buffer[80];
+  strftime(buffer, sizeof(buffer), "%m/%d/%Y %I:%M:%S", timeinfo);
+  TimeDate = buffer;
+  Execute("INSERT INTO tokens (uuid, token, ip, os, browser, date) VALUES ('" + UUID + "', '" + Token + "', '" + IP + "', '" + OS + "', '" + Browser + "', '" + TimeDate + "')");
+  return Token;
+}
 
 void* ClientHandler(void* arg) {
+  std::map<std::string, std::string> Headers, Queries, Params;
   std::chrono::_V2::system_clock::time_point StartTime = std::chrono::system_clock::now();
   Client* Data = (Client*)arg;
   std::string Type = "", Path, Body;
@@ -108,34 +150,38 @@ void* ClientHandler(void* arg) {
         std::string Key = Header.substr(0, Header.find_first_of(":"));
         std::transform(Key.begin(), Key.end(), Key.begin(), [](unsigned char c) { return std::tolower(c); });
         std::string Value = Header.substr(Header.find_first_of(":")+2);
-        Headers[Key] = Value;
+        Headers[Key] = SanitizeSQL(Value);
       } else {
         Body += Header + "\n";
       }
     }
   }
   if (Body.size()>0) Body = Body.substr(2, Body.length()-3);
-  std::map<std::string, std::string> Params;
   if (Type == "POST") {
-    std::string ContentType = Headers["content-type"];
-    if (ContentType.find("application/x-www-form-urlencoded") != std::string::npos) {
+    if (Headers["content-type"].find("application/x-www-form-urlencoded") != std::string::npos) {
       std::string Data = Body;
       std::istringstream DataStream(Data);
       std::string Param;
       while(getline(DataStream, Param, '&')) {
         std::string Key = Param.substr(0, Param.find_first_of("="));
         std::string Value = Param.substr(Param.find_first_of("=")+1);
-        std::string newValue = "";
-        for (int i=0; i<Value.length(); i++) {
-          if (Value[i] == '\'') {
-            newValue += "\\'";
-          } else {
-            newValue += Value[i];
-          }
-        }
-        Params[Key] = newValue;
+        Params[Key] = SanitizeSQL(Value);
       }
     }
+  }
+  if (Path.find("?") != std::string::npos) {
+    std::string Query = Path.substr(Path.find_last_of("?")+1);
+    Path = Path.substr(0, Path.find_last_of("?"));
+    std::istringstream DataStream(Query);
+    std::string Param;
+    while(getline(DataStream, Param, '&')) {
+      std::string Key = Param.substr(0, Param.find_first_of("="));
+      std::string Value = Param.substr(Param.find_first_of("=")+1);
+      Queries[Key] = SanitizeSQL(Value);
+    }
+    std::string newPath = "";
+    for (int i=0; i<Path.length(); i++) if (Path.substr(i, 2) != "//") newPath += Path[i];
+    Path = newPath[newPath.length()-1]=='/' ? newPath.substr(0, newPath.length()-1) : newPath;
   }
 
   if (Headers["connection"] == "keep-alive") {
@@ -242,10 +288,10 @@ void* ClientHandler(void* arg) {
         ResponseCode = "400 Bad Request";
         ResponseData = "{\"error\":\"Invalid request method\"}";
       }
-    } else if (Path.substr(0, 20) == "/api/user/pfp?email=") {
+    } else if (Path == "/api/user/pfp" && Queries["email"].length() > 0) {
       if (Type == "GET") {
-        std::string uuid = "", email = Path.substr(20);
-        sql::ResultSet *res = Query("SELECT * FROM users WHERE email='" + email + "'");
+        std::string uuid = "";
+        sql::ResultSet *res = Query("SELECT * FROM users WHERE email='" + Queries["email"] + "'");
         while (res->next()) uuid = res->getString("uuid");
         delete res;
         if (uuid == "") {
@@ -277,6 +323,115 @@ void* ClientHandler(void* arg) {
       } else {
         ResponseCode = "400 Bad Request";
         ResponseData = "{\"error\":\"Invalid request method\"}";
+      }
+    } else if (Path == "/api/user/exists" && Queries["email"].length() > 0) {
+      if (Type == "GET") {
+        sql::ResultSet *res = Query("SELECT * FROM users WHERE email='" + Queries["email"] + "'");
+        bool exists = false;
+        while (res->next()) {
+          exists = true;
+        }
+        delete res;
+        if (exists) {
+          ResponseCode = "200 OK";
+          ResponseData = "{\"exists\":true}";
+        } else {
+          ResponseCode = "200 OK";
+          ResponseData = "{\"exists\":false}";
+        }
+      } else {
+        ResponseCode = "400 Bad Request";
+        ResponseData = "{\"error\":\"Invalid request method\"}";
+      }
+    } else if (Path == "/api/user/login" && Params["email"].length() > 0 && Params["password"].length() > 0) {
+      if (Type == "POST") {
+        sql::ResultSet *res = Query("SELECT * FROM users WHERE email='" + Params["email"] + "' AND password='" + SHA512::hash(Params["password"]) + "'");
+        bool exists = false;
+        std::string uuid = "";
+        std::vector<std::string> phoneNumbers, phoneNumberIDs;
+        while (res->next()) {
+          exists = true;
+          uuid = res->getString("uuid");
+        }
+        if (!exists) {
+          ResponseCode = "401 Unauthorized";
+          ResponseData = "{\"error\":\"Wrong email or password\"}";
+        } else {
+          if (Params["id"].length() > 0 && Params["code"].length() == 4) {
+            res = Query("SELECT * FROM phones WHERE uuid='" + uuid + "' AND id='" + Params["id"] + "' AND code='" + Params["code"] + "'");
+            bool correctCode = false;
+            while (res->next()) correctCode = true;
+            if (!correctCode) {
+              srand(time(0)*getpid()*Data->getClientSocket());
+              std::string code = "";
+              for (int i = 0; i < 4; i++) code += "0123456789"[rand() % 10];
+              std::cout << "Sending code " << code << " to " << Params["id"] << std::endl;
+              Execute("UPDATE phones SET code='" + code + "' WHERE id='" + Params["id"] + "'");
+              ResponseCode = "200 OK";
+              ResponseData = "{\"error\":\"The code provided was incorrect\"}";
+            } else {
+              // Create token and add to session
+              std::cout << "Session ID: " << Headers["cookie"] << std::endl;
+              if (Headers["cookie"].find("session=") == std::string::npos) {
+                res = Query("SELECT * FROM sessions WHERE id='" + Headers["cookie"].substr(Headers["cookie"].find("session="), 128) + "'");
+                while(res->next()) {
+                  std::stringstream ss(res->getString("tokens"));
+                  std::string token;
+                  while (std::getline(ss, token, ',')) {
+                    if (token.length() > 0) {
+                      sql::ResultSet *tokenLookup = Query("SELECT * FROM tokens WHERE token='" + token + "'");
+                      while (tokenLookup->next()) if (tokenLookup->getString("uuid") == uuid) {
+                        delete tokenLookup;
+                        delete res;
+                        ResponseCode = "200 OK";
+                        ResponseData = "{\"error\":\"You are already logged in\"}";
+                      } else {
+                        delete tokenLookup;
+                        std::string Token = CreateToken(uuid, Data->getClientSocket(), std::string(inet_ntoa(Data->getClientAddress()->sin_addr)), Params["browser"], Params["os"]);
+                        
+                        // Update sessions table with new token
+                        Execute("UPDATE sessions SET tokens='" + res->getString("tokens")+","+Token + "' WHERE id='" + Headers["cookie"].substr(Headers["cookie"].find("session="), 128) + "'");
+                      }
+                    }
+                  }
+                }
+                delete res;
+                
+              }
+              ResponseCode = "200 OK";
+              ResponseData = "{\"uuid\":\"" + uuid + "\"}";
+            }
+          } else {
+            // Create code
+            res = Query("SELECT * FROM phones WHERE uuid='" + uuid + "'");
+            int i = 0;
+            while (res->next()) {
+              i++;
+              if (res->getBoolean("enabled")) {
+                srand(time(0)*getpid()*Data->getClientSocket()*i);
+                std::string code = "";
+                for (int i = 0; i < 4; i++) code += "0123456789"[rand() % 10];
+                Execute("UPDATE phones SET code='" + code + "' WHERE id='" + res->getString("id") + "'");
+                phoneNumbers.push_back("(***) ***-"+res->getString("phone").substr(res->getString("phone").length()-4, 4));
+                phoneNumberIDs.push_back(res->getString("id"));
+              }
+            }
+            delete res;
+            if (phoneNumbers.size() > 0) {
+              ResponseData = "{\"PhoneNumbers\": [";
+              for (int i = 0; i < phoneNumbers.size(); i++) {
+                ResponseData += "[\"" + phoneNumbers[i] + "\", \"" + phoneNumberIDs[i] + "\"]";
+                if (i != phoneNumbers.size()-1) ResponseData += ",";
+              }
+              ResponseData += "]}";
+              ResponseCode = "200 OK";
+            } else {
+              // Create token and add to session
+              ResponseCode = "200 OK";
+              ResponseData = "{\"uuid\":\"" + uuid + "\"}";
+            }
+          }
+        }
       }
     }
   }

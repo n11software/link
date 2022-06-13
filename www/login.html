@@ -8,16 +8,72 @@
     <link rel="stylesheet" href="/css/globals.css">
   </head>
   <body>
-    <span class="logo">NULL</span>
-    <div class="center">
+    <a class="logo" href="/">NULL</a>
+    <div class="center" id="account-select">
+      <div class="title">Choose an account</div>
+      <div class="account" onclick="LoginPreExisting(0)">
+        <img src="/api/user/pfp?email=levicowan2005@icloud.com">
+        <div class="info">
+          <span class="name">Levi Hicks</span>
+          <span class="email">levicowan2005@icloud.com</span>
+        </div>
+      </div>
+      <div class="account" onclick="LoginPreExisting(1)">
+        <img src="/api/user/pfp?email=test@gmail.com">
+        <div class="info">
+          <span class="name">Test Dummy</span>
+          <span class="email">test@gmail.com</span>
+        </div>
+      </div>
+      <a class="button">Other</a>
+    </div>
+    <div class="center hidden" id="email">
       <span class="input-title">Email Address</span>
       <div class="input">
         <input type="email" name="email" autocomplete="off">
+        <svg xmlns="http://www.w3.org/2000/svg" class="hidden error" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="hidden success" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
       </div>
-      <a class="button">Next</a>
+      <a class="button" disabled>Next</a>
       <span class="signup">
-        Don't have an account? <a>Sign up</a>
+        Don't have an account? <a href="/signup">Sign up</a>
       </span>
     </div>
+    <div class="center hidden" id="password">
+      <span class="input-title">Password</span>
+      <div class="input">
+        <input type="password" name="password" autocomplete="off">
+      </div>
+      <div class="buttons">
+        <a class="button-secondary">Back</a>
+        <a class="button" disabled>Next</a>
+      </div>
+    </div>
+    <div class="center hidden" id="code-fa-select">
+      <div class="title">Choose a method</div>
+    </div>
+    <div class="center hidden" id="code-fa">
+      <span class="error" id="code-fa-error"></span>
+      <span class="check-code" id="check-code">Please check your {PhoneOrEmail}</span>
+      <span class="sent-code" id="sent-code">We've sent you a {new} code.</span>
+      <div class="code-fa-wrapper" id="code-fa-wrapper">
+        <input type="number" class="code-fa" id="code-fa-1" autofocus/>
+        <input type="number" class="code-fa" id="code-fa-2"/>
+        <input type="number" class="code-fa" id="code-fa-3"/>
+        <input type="number" class="code-fa" id="code-fa-4"/>
+      </div>
+      <span class="resend-code" id="resend-code">
+        Didn't get {PreCodeType} {CodeType}? <a>Resend</a>
+      </span>
+      <div class="buttons">
+        <a class="button-secondary">Back</a>
+        <a class="button" id="next" disabled>Next</a>
+      </div>
+    </div>
+    <script src="/js/login.js"></script>
   </body>
 </html>
