@@ -1,4 +1,4 @@
-#include "../Includes/SHA512.hpp"
+#include "../Includes/SHA512"
 #include <stdio.h>
 #include <string>
 #include <string.h>
