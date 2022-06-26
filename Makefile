@@ -4,12 +4,20 @@ CPPSourceCode = $(call rwildcard,Source,*.cpp)
 Objects = $(patsubst Source/%.cpp, Build/%.o, $(CPPSourceCode))
 Directories = $(wildcard Source/*)
 
+default: Library Install Test
+
 Build/%.o: Source/%.cpp
 	@mkdir -p $(@D)
-	@g++ -c $^ -std=c++2a -pthread -o $@
+	@g++ -c $^ -std=c++2a -fpic -pthread -o $@
 
-Link: $(Objects)
-	@g++ $(Objects) -std=c++2a -lmysqlcppconn -pthread -o Link
+Library: $(Objects)
+	@g++ -shared -std=c++2a -pthread -o liblink.so $(Objects)
 
-run:
-	@./Link
+Install:
+	@cp liblink.so /usr/lib/
+	@cp -R Includes/* /usr/include/
+
+.PHONY: Test
+
+Test: Install
+	@make -C Test run --no-print-directory

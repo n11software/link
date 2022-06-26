@@ -104,7 +104,20 @@
     "span": "cpp",
     "syncstream": "cpp",
     "typeindex": "cpp",
-    "valarray": "cpp"
+    "valarray": "cpp",
+    "sha512": "cpp",
+    "link": "cpp",
+    "cassert": "cpp",
+    "ccomplex": "cpp",
+    "cerrno": "cpp",
+    "cfloat": "cpp",
+    "ciso646": "cpp",
+    "climits": "cpp",
+    "cstdalign": "cpp",
+    "cstdbool": "cpp",
+    "ctgmath": "cpp",
+    "filesystem": "cpp",
+    "version": "cpp"
   },
   "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

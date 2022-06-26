@@ -1,5 +1,12 @@
 make --dry-run --keep-going --print-directory
 make: Entering directory '/home/fire/Link'
-make: 'Link' is up to date.
+mkdir -p Build
+g++ -c Source/Link.cpp -std=c++2a -fpic -pthread -o Build/Link.o
+mkdir -p Build
+g++ -c Source/Request.cpp -std=c++2a -fpic -pthread -o Build/Request.o
+g++ -shared -std=c++2a -pthread -o liblink.so  Build/Link.o  Build/Request.o  Build/SHA512.o
+cp liblink.so /usr/lib/
+cp -R Includes/* /usr/include/
+make -C Test run --no-print-directory
 make: Leaving directory '/home/fire/Link'
  

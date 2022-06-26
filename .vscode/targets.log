@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Jun 10 00:12:51 2022
+# Make data base, printed on Sat Jun 25 18:02:32 2022
 
 # Variables
 
@@ -99,7 +99,7 @@ MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /home/fire/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Program Files/Oculus/Support/oculus-runtime:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/nodejs/:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/Nginx:/mnt/c/Program Files (x86)/sox-14-4-2:/mnt/c/Program Files (x86)/FFAIO/bin:/mnt/c/Users/fire/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/fire/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/fire/AppData/Roaming/npm:/mnt/c/Users/fire/AppData/Local/GitHubDesktop/bin
+PATH = /home/fire/.vscode-server/bin/30d9c6cd9483b2cc586687151bcbcd635f373630/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Program Files/Oculus/Support/oculus-runtime:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/nodejs/:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/Nginx:/mnt/c/Program Files (x86)/sox-14-4-2:/mnt/c/Program Files (x86)/FFAIO/bin:/mnt/c/Users/fire/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/fire/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/fire/AppData/Roaming/npm:/mnt/c/Users/fire/AppData/Local/GitHubDesktop/bin
 # default
 MAKEFILES := 
 # automatic
@@ -127,7 +127,7 @@ LOGNAME = fire
 # environment
 VSCODE_WSL_EXT_LOCATION = /mnt/c/Users/fire/.vscode/extensions/ms-vscode-remote.remote-wsl-0.66.3
 # makefile
-.DEFAULT_GOAL := Link
+.DEFAULT_GOAL := default
 # environment
 DISPLAY = :0
 # environment
@@ -141,13 +141,13 @@ CPPSourceCode = $(call rwildcard,Source,*.cpp)
 # environment
 PAGER = less
 # environment
-_ = /home/fire/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/node
+_ = /home/fire/.vscode-server/bin/30d9c6cd9483b2cc586687151bcbcd635f373630/node
 # environment
 XDG_RUNTIME_DIR = /mnt/wslg/runtime-dir
 # makefile (from 'Makefile', line 5)
 Directories = $(wildcard Source/*)
 # environment
-VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-977b8264-ac3b-459e-a73a-8c9bd382e703.sock
+VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-19618769-7fd1-4fe1-8438-28a1a22501d1.sock
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
@@ -167,7 +167,7 @@ WSL_DISTRO_NAME = Ubuntu-22.04
 # makefile (from 'Makefile', line 1)
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 # variable set hash-table stats:
-# Load=77/1024=8%, Rehash=0, Collisions=2/119=2%
+# Load=77/1024=8%, Rehash=0, Collisions=2/117=2%
 
 # Pattern-specific Variable Values
 
@@ -175,21 +175,20 @@ rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(
 
 # Directories
 
-# Source/Log.cpp (device 2080, inode 155179): could not be opened.
-# . (device 2080, inode 83967): 14 files, no impossibilities.
+# Source/Link.cpp (device 2080, inode 84021): could not be opened.
+# Source/Request.cpp (device 2080, inode 131331): could not be opened.
+# . (device 2080, inode 83967): 18 files, no impossibilities.
 # Source/SHA512.cpp (device 2080, inode 234626): could not be opened.
-# Source/main.cpp (device 2080, inode 154919): could not be opened.
-# Source/Client.cpp (device 2080, inode 155732): could not be opened.
-# Source (device 2080, inode 154914): 6 files, no impossibilities.
+# Source (device 2080, inode 83777): 5 files, no impossibilities.
 
-# 20 files, no impossibilities in 6 directories.
+# 23 files, no impossibilities in 5 directories.
 
 # Implicit Rules
 
 Build/%.o: Source/%.cpp
-#  recipe to execute (from 'Makefile', line 8):
+#  recipe to execute (from 'Makefile', line 10):
 	@mkdir -p $(@D)
-	@g++ -c $^ -std=c++2a -pthread -o $@
+	@g++ -c $^ -std=c++2a -fpic -pthread -o $@
 
 # 1 implicit rules, 0 (0.0%) terminal.
 # Files
@@ -200,18 +199,38 @@ Build/SHA512.o:
 #  Modification time never checked.
 #  File has not been updated.
 
+default: Library Install Test
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+Test: Install
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 23):
+	@make -C Test run --no-print-directory
+
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-10 00:03:21.264176575
+#  Last modified 2022-06-25 18:02:21.95820795
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
-Build/Log.o:
+Build/Request.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
+
+Library: Build/Link.o Build/Request.o Build/SHA512.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 14):
+	@g++ -shared -std=c++2a -pthread -o liblink.so $(Objects)
 
 # Not a target:
 .DEFAULT:
@@ -226,46 +245,39 @@ all:
 #  File does not exist.
 #  File has not been updated.
 
-run:
+Install:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 15):
-	@./Link
-
-Link: Build/Client.o Build/Log.o Build/SHA512.o Build/main.o
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  recipe to execute (from 'Makefile', line 12):
-	@g++ $(Objects) -std=c++2a -lmysqlcppconn -pthread -o Link
+#  recipe to execute (from 'Makefile', line 17):
+	@cp liblink.so /usr/lib/
+	@cp -R Includes/* /usr/include/
 
 # Not a target:
-Build/Client.o:
+Build/Link.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
-# Not a target:
-Build/main.o:
+.PHONY: Test
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
 # files hash-table stats:
-# Load=10/1024=1%, Rehash=0, Collisions=0/24=0%
+# Load=12/1024=1%, Rehash=0, Collisions=0/33=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 34 / storage = 336 B / avg = 9 B
-# current buf: size = 8162 B / used = 336 B / count = 34 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 38 / storage = 382 B / avg = 10 B
+# current buf: size = 8162 B / used = 382 B / count = 38 / avg = 10 B
 
-# strcache performance: lookups = 44 / hit rate = 22%
+# strcache performance: lookups = 56 / hit rate = 32%
 # hash-table stats:
-# Load=34/8192=0%, Rehash=0, Collisions=0/44=0%
-# Finished Make data base on Fri Jun 10 00:12:51 2022
+# Load=38/8192=0%, Rehash=0, Collisions=0/56=0%
+# Finished Make data base on Sat Jun 25 18:02:32 2022
 
  

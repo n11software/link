@@ -1,4 +1,4 @@
 *.o
-Public/
-Link
+./Link
 Build/
+Test/Test
