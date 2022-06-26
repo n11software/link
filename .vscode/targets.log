@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Jun 25 18:02:32 2022
+# Make data base, printed on Sun Jun 26 03:02:46 2022
 
 # Variables
 
@@ -57,7 +57,7 @@ CURDIR := /home/fire/Link
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -147,7 +147,7 @@ XDG_RUNTIME_DIR = /mnt/wslg/runtime-dir
 # makefile (from 'Makefile', line 5)
 Directories = $(wildcard Source/*)
 # environment
-VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-19618769-7fd1-4fe1-8438-28a1a22501d1.sock
+VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-0402c4f0-4598-4cdf-9d33-c746a9e3f72a.sock
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
@@ -167,7 +167,7 @@ WSL_DISTRO_NAME = Ubuntu-22.04
 # makefile (from 'Makefile', line 1)
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 # variable set hash-table stats:
-# Load=77/1024=8%, Rehash=0, Collisions=2/117=2%
+# Load=77/1024=8%, Rehash=0, Collisions=2/121=2%
 
 # Pattern-specific Variable Values
 
@@ -177,11 +177,13 @@ rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(
 
 # Source/Link.cpp (device 2080, inode 84021): could not be opened.
 # Source/Request.cpp (device 2080, inode 131331): could not be opened.
-# . (device 2080, inode 83967): 18 files, no impossibilities.
+# . (device 2080, inode 83967): 16 files, no impossibilities.
 # Source/SHA512.cpp (device 2080, inode 234626): could not be opened.
-# Source (device 2080, inode 83777): 5 files, no impossibilities.
+# Source (device 2080, inode 83777): 7 files, no impossibilities.
+# Source/Response.cpp (device 2080, inode 136265): could not be opened.
+# Source/HTTPTools.cpp (device 2080, inode 136578): could not be opened.
 
-# 23 files, no impossibilities in 5 directories.
+# 23 files, no impossibilities in 7 directories.
 
 # Implicit Rules
 
@@ -225,7 +227,13 @@ Build/Request.o:
 #  Modification time never checked.
 #  File has not been updated.
 
-Library: Build/Link.o Build/Request.o Build/SHA512.o
+# Not a target:
+Build/Response.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+Library: Build/HTTPTools.o Build/Link.o Build/Request.o Build/Response.o Build/SHA512.o
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -259,25 +267,32 @@ Build/Link.o:
 #  Modification time never checked.
 #  File has not been updated.
 
-.PHONY: Test
+# Not a target:
+Build/HTTPTools.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
+.PHONY: Test
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+ 
+
 # files hash-table stats:
-# Load=12/1024=1%, Rehash=0, Collisions=0/33=0%
+# Load=14/1024=1%, Rehash=0, Collisions=0/37=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 38 / storage = 382 B / avg = 10 B
-# current buf: size = 8162 B / used = 382 B / count = 38 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 42 / storage = 461 B / avg = 10 B
+# current buf: size = 8162 B / used = 461 B / count = 42 / avg = 10 B
 
-# strcache performance: lookups = 56 / hit rate = 32%
+# strcache performance: lookups = 60 / hit rate = 30%
 # hash-table stats:
-# Load=38/8192=0%, Rehash=0, Collisions=0/56=0%
-# Finished Make data base on Sat Jun 25 18:02:32 2022
+# Load=42/8192=1%, Rehash=0, Collisions=0/60=0%
+# Finished Make data base on Sun Jun 26 03:02:46 2022
 
  
