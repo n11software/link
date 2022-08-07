@@ -31,7 +31,7 @@
 #include <cstring>
 #include <chrono>
 #include <vector>
-#include <bits/stdc++.h>
+#include <functional>
 #include "../Includes/Link/Response.hpp"
 
 /*

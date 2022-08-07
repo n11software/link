@@ -32,7 +32,6 @@
 #include <cstring>
 #include <chrono>
 #include <vector>
-#include <bits/stdc++.h>
 #include "../Includes/Link/HTTPTools.hpp"
 
 /*
