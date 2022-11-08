@@ -14,6 +14,7 @@
 
 #ifndef decodeHTTP
 #include <iostream>
+#include <algorithm>
 #include "../Includes/Link/HTTPTools.hpp"
 
 /*
@@ -29,6 +30,28 @@ std::string decodeHTTP(std::string &src) {
   int i, ii;
   for (i=0;i<src.length();i++) {
     if (int(src[i])=='%') {
+      switch (src[i+1]) {
+        case '0':
+        case '1':
+        case '2':
+        case '3': 
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case 'a':
+        case 'b':
+        case 'c':
+        case 'd':
+        case 'e':
+        case 'f':
+          break;
+        default:
+          ret += '%';
+          continue;
+      }
       sscanf(src.substr(i+1,2).c_str(), "%x", &ii);
       ch=static_cast<char>(ii);
       ret+=ch;

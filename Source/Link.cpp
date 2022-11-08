@@ -166,7 +166,7 @@ int Link::Start() {
     if (line.substr(0, 3) == "GET" || line.substr(0, 4) == "POST" || line.substr(0, 3) == "PUT" || line.substr(0, 6) == "DELETE") {
       method = line.substr(0, 3) == "GET" ? "GET" : line.substr(0, 4) == "POST" ? "POST" : line.substr(0, 3) == "PUT"? "PUT" : "DELETE";
       path = line.substr(method.length()+1);
-      path = path.substr(0, path.find_last_of("HTTP/1.1")-8);
+      path = path.substr(0, path.length()-(path.substr(path.find_last_of("HTTP/")-5)).length());
     } else {
       close(sock);
       continue;

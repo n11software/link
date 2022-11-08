@@ -31,6 +31,7 @@
 #include <cstring>
 #include <chrono>
 #include <vector>
+#include <algorithm>
 #include "../Includes/Link/Request.hpp"
 #include "../Includes/Link/HTTPTools.hpp"
 

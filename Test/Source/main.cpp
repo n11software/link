@@ -2,9 +2,9 @@
 #include <link>
 
 int main() {
-  Link HTTP(80);
+  Link HTTP(3000);
   HTTP.Error(404, [](Request* request, Response* response) {
-    response->SetHTTP("HTTP/1.1 404 Not Found\r\n\r\n404 Not Found");
+    response->SetHTTP("HTTP/2 404 Not Found\r\n\r\n404 Not Found");
   });
   HTTP.Default([](Request* request, Response* response) {
     response->Error(404);

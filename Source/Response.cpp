@@ -95,7 +95,7 @@ void Response::SendFile(std::string path) {
   std::stringstream buffer;
   buffer << file.rdbuf();
   std::string body = buffer.str();
-  http = "HTTP/1.1 " + status + "\n";
+  http = "HTTP/2 " + status + "\n";
   if (headers.size() > 0) for (std::_Rb_tree_iterator<std::pair<const std::string, std::string>> it = headers.begin(); it != headers.end(); it++) http += it->first + ": " + it->second + "\n";
   http += "\n"+body;
 }
