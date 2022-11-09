@@ -35,13 +35,14 @@
 #include "../Includes/Link/Request.hpp"
 #include "../Includes/Link/HTTPTools.hpp"
 
-Request::Request(int sock, sockaddr_in* addr, std::string path, std::string method, std::string request, std::map<std::string, std::string> queries) {
+Request::Request(int sock, sockaddr_in* addr, std::string protocol, std::string path, std::string method, std::string request, std::map<std::string, std::string> queries) {
   this->sock = sock;
   this->addr = addr;
   this->path = path;
   this->method = method;
   this->request = request;
   this->queries = queries;
+  this->protocol = protocol;
   {
     std::string header;
     std::istringstream stream(decodeHTTP(request));
@@ -71,6 +72,10 @@ Request::Request(int sock, sockaddr_in* addr, std::string path, std::string meth
       this->params[key] = sanitize(value);
     }
   }
+}
+
+std::string Request::GetProtocolVersion() {
+  return this->protocol;
 }
 
 std::string Request::GetPath() {

@@ -76,7 +76,7 @@ void Response::SetHTTP(std::string http) {
  * Sends the HTTP response with the given body.
  */
 void Response::Send(std::string body) {
-  http = "HTTP/2 " + status + "\n";
+  http = "HTTP/"+this->request->GetProtocolVersion()+" " + status + "\n";
   if (headers.size() > 0) for (std::_Rb_tree_iterator<std::pair<const std::string, std::string>> it = headers.begin(); it != headers.end(); it++) http += it->first + ": " + it->second + "\n";
   http += "\n" + body;
 }
@@ -95,7 +95,7 @@ void Response::SendFile(std::string path) {
   std::stringstream buffer;
   buffer << file.rdbuf();
   std::string body = buffer.str();
-  http = "HTTP/2 " + status + "\n";
+  http = "HTTP/"+this->request->GetProtocolVersion()+" " + status + "\n";
   if (headers.size() > 0) for (std::_Rb_tree_iterator<std::pair<const std::string, std::string>> it = headers.begin(); it != headers.end(); it++) http += it->first + ": " + it->second + "\n";
   http += "\n"+body;
 }

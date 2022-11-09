@@ -159,7 +159,7 @@ int Link::Start() {
     socklen_t addrSize = sizeof(addr);
     int sock = accept(this->sock, (struct sockaddr*)&addr, &addrSize);
     recv(sock, buffer, 1024, 0);
-    std::string bufferStr = buffer, line, path, method;
+    std::string bufferStr = buffer, line, path, method, protocol;
     std::map<std::string, std::string> queriesMap;
     std::istringstream stream(decodeHTTP(bufferStr));
     getline(stream, line);
@@ -167,6 +167,7 @@ int Link::Start() {
       method = line.substr(0, 3) == "GET" ? "GET" : line.substr(0, 4) == "POST" ? "POST" : line.substr(0, 3) == "PUT"? "PUT" : "DELETE";
       path = line.substr(method.length()+1);
       path = path.substr(0, path.length()-(path.substr(path.find_last_of("HTTP/")-5)).length());
+      protocol = line.substr(line.find_last_of("HTTP/"));
     } else {
       close(sock);
       continue;
@@ -185,7 +186,7 @@ int Link::Start() {
       for (int i=0; i<path.length(); i++) if (path.substr(i, 2) != "//") newPath += path[i];
       path = newPath[newPath.length()-1]=='/' ? newPath.substr(0, newPath.length()-1) : newPath;
     }
-    Request request(sock, &addr, path, method, buffer, queriesMap);
+    Request request(sock, &addr, protocol, path, method, buffer, queriesMap);
     if (this->handlers.contains(path+method)) {
       ThreadInfo* info = new ThreadInfo();
       info->func = this->handlers.find(path+method)->second;

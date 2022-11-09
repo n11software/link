@@ -19,9 +19,10 @@
 
 class Request {
   public:
-    Request(int sock, sockaddr_in* addr, std::string path, std::string method, std::string request, std::map<std::string, std::string> queries);
+    Request(int sock, sockaddr_in* addr, std::string protocol, std::string path, std::string method, std::string request, std::map<std::string, std::string> queries);
     std::string GetRequest();
     std::string GetPath();
+    std::string GetProtocolVersion();
     std::string GetMethod();
     std::string GetHeader(std::string header);
     std::string GetQuery(std::string query);
@@ -33,5 +34,5 @@ class Request {
     int sock;
     struct sockaddr_in* addr;
     std::map<std::string, std::string> headers, queries, params;
-    std::string path, method, request, body;
+    std::string protocol, path, method, request, body;
 };
