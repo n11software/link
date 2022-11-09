@@ -52,7 +52,8 @@ Request::Request(int sock, sockaddr_in* addr, std::string protocol, std::string 
         std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
         std::string value = header.substr(header.find_first_of(":")+2);
         this->headers[key] = sanitize(value);
-      } else this->body += header + "\n";
+      } else if (header.substr(0, 3) == "GET" || header.substr(0, 4) == "POST" || header.substr(0, 3) == "PUT" || header.substr(0, 6) == "DELETE") {}
+      else this->body += header + "\n";
     }
   }
   if (this->headers["connection"] == "keep-alive") {
@@ -64,9 +65,17 @@ Request::Request(int sock, sockaddr_in* addr, std::string protocol, std::string 
   }
   if (this->body.size()>0) this->body = this->body.substr(2, this->body.length()-3);
   if (this->method == "POST" && headers["content-type"].find("application/x-www-form-urlencoded") != std::string::npos) {
-    std::istringstream stream(this->body);
     std::string parameter;
-    while(getline(stream, parameter, '&')) {
+    std::vector<std::string> arr;
+    size_t pos = 0;
+    std::string token;
+    while ((pos = body.find("&")) != std::string::npos) {
+      token = body.substr(0, pos);
+      if (token != "") arr.push_back(token);
+      body.erase(0, pos + 1);
+    }
+    if (body != "") arr.push_back(body);
+    for (std::string parameter : arr) {
       std::string key = parameter.substr(0, parameter.find_first_of("="));
       std::string value = parameter.substr(parameter.find_first_of("=")+1);
       this->params[key] = sanitize(value);
