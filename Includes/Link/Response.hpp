@@ -12,7 +12,7 @@
  * |______________________________________|
  */
 
-#ifndef Response
+#pragma once
 #include <iostream>
 #include "Request.hpp"
 
@@ -38,5 +38,3 @@ class Response {
     std::map<std::string, std::string> headers;
     std::map<int, std::function<void(Request*, Response*)>>* errorHandlers;
 };
-
-#endif

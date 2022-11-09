@@ -1,5 +1,4 @@
-#ifndef SHA512
-
+#pragma once
 #include <string>
 
 namespace SHA512 {
@@ -13,5 +12,3 @@ namespace SHA512 {
 #define Sig1(x) ((RotR(x, 14))^(RotR(x,18))^(RotR(x, 41)))
 #define sig0(x) (RotR(x, 1)^RotR(x,8)^(x>>7))
 #define sig1(x) (RotR(x, 19)^RotR(x,61)^(x>>6))
-
-#endif

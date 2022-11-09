@@ -12,7 +12,7 @@
  * |______________________________________|
  */
 
-#ifndef Link
+#pragma once
 #include <functional>
 #include <vector>
 #include "Response.hpp"
@@ -35,5 +35,3 @@ class Link {
     std::map<std::string, std::function<void(Request*, Response*)>> handlers;
     std::map<int, std::function<void(Request*, Response*)>> errorHandlers;
 };
-
-#endif

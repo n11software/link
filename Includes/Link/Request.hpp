@@ -12,7 +12,7 @@
  * |______________________________________|
  */
 
-#ifndef Request
+#pragma once
 #include <iostream>
 #include <map>
 #include <netinet/in.h>
@@ -35,5 +35,3 @@ class Request {
     std::map<std::string, std::string> headers, queries, params;
     std::string path, method, request, body;
 };
-
-#endif

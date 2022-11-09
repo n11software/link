@@ -12,10 +12,8 @@
  * |_______________________________________|
  */
 
-#ifndef decodeHTTP
+#pragma once
 #include <iostream>
 
 std::string decodeHTTP(std::string &src);
 std::string sanitize(std::string value);
-
-#endif
