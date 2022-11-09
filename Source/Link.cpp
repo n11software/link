@@ -167,7 +167,7 @@ int Link::Start() {
       method = line.substr(0, 3) == "GET" ? "GET" : line.substr(0, 4) == "POST" ? "POST" : line.substr(0, 3) == "PUT"? "PUT" : "DELETE";
       path = line.substr(method.length()+1);
       path = path.substr(0, path.length()-(path.substr(path.find_last_of("HTTP/")-5)).length());
-      protocol = line.substr(line.find_last_of("HTTP/"));
+      protocol = "1.1";
     } else {
       close(sock);
       continue;
