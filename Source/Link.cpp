@@ -186,26 +186,53 @@ int Link::Start() {
       for (int i=0; i<path.length(); i++) if (path.substr(i, 2) != "//") newPath += path[i];
       path = newPath[newPath.length()-1]=='/' ? newPath.substr(0, newPath.length()-1) : newPath;
     }
-    Request request(sock, &addr, protocol, path, method, buffer, queriesMap);
-    if (this->handlers.contains(path+method)) {
+
+    bool isHandled = false;
+
+    for (auto handler: this->handlers) {
+      std::string key = handler.first;
+      if (key.length() < method.length()) continue;
+      std::string handlerPath = key.substr(0, key.length()-method.length());
+      if (key.substr(key.length()-method.length()) != method) continue;
+      bool vars = false;
+      std::string buf = handlerPath;
+      while (buf.find("{") != std::string::npos) {
+        std::string variable = buf.substr(buf.find("{")+1, buf.find("}")-buf.find("{")-1);
+        std::string value = path.substr(buf.find("{"));
+        queriesMap[variable] = sanitize(value);
+        buf = buf.substr(buf.find("}")+1);
+        vars = true;
+      }
+      if (handlerPath.find("*") != std::string::npos) {
+        std::string wild = handlerPath.substr(0, handlerPath.find("*"));
+        if (path.substr(0, wild.length()) != wild) continue;
+      } else if (handlerPath != path && !vars) continue;
+      Request request(sock, &addr, protocol, path, method, buffer, queriesMap);
       ThreadInfo* info = new ThreadInfo();
-      info->func = this->handlers.find(path+method)->second;
+      info->func = handler.second;
       info->request = &request;
       info->errorHandlers = this->errorHandlers;
+      isHandled = true;
       pthread_t thread;
       pthread_create(&thread, NULL, threadWrapper, info);
       pthread_join(thread, NULL);
-    } else if (this->defaultHandler != nullptr) {
+      break;
+    }
+
+    if (!isHandled && this->defaultHandler != nullptr) {
       ThreadInfo* info = new ThreadInfo();
       info->func = this->defaultHandler;
+      Request request(sock, &addr, protocol, path, method, buffer, queriesMap);
       info->request = &request;
       info->errorHandlers = this->errorHandlers;
       pthread_t thread;
       pthread_create(&thread, NULL, threadWrapper, info);
       pthread_join(thread, NULL);
-    } else {
+    }
+    
+    if (defaultHandler == nullptr) {
       close(sock);
-      shutdown(this->sock, SHUT_RDWR); 
+      shutdown(this->sock, SHUT_RDWR);
       return 5;
     }
   }

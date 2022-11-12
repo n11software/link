@@ -12,6 +12,9 @@ int main() {
   HTTP.Get("/", [](Request* request, Response* response) {
     response->Send("<h1>Hello World!</h1>");
   });
+  HTTP.Get("/{var}", [](Request* request, Response* response) {
+    response->Send("<h1>"+request->GetQuery("var")+"</h1>");
+  });
   std::cout << "Starting server..." << std::endl;
   HTTP.Start();
   return 0;
