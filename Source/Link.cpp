@@ -136,6 +136,19 @@ void Link::Error(int code, std::function<void(Request*, Response*)> callback) {
   this->errorHandlers[code] = callback;
 }
 
+std::vector<std::string> split(std::string data, std::string delimiter) {
+  std::vector<std::string> result;
+  size_t pos = 0;
+  std::string token;
+  while ((pos = data.find(delimiter)) != std::string::npos) {
+    token = data.substr(0, pos);
+    if (token != "") result.push_back(token);
+    data.erase(0, pos + delimiter.length());
+  }
+  if (data != "") result.push_back(data);
+  return result;
+}
+
 /*
  * Binds and listens on specified port
  *
@@ -190,23 +203,34 @@ int Link::Start() {
     bool isHandled = false;
 
     for (auto handler: this->handlers) {
+      /*
+       * So basically here I had a mild stroke and decided to use my maniacal logic to create a variable system
+       * It just splits the path by / and the handler path by / and if one of the parts of the path starts with { it will replace that part of the handler path with that part of the path
+       * And at the end if they are the same it will call that handler, if not it will find another handler or commit die
+       * If the path has a * it will just check if the handler path starts with the path before the * and if it does it will call that handler
+       * and at the end if the path is just not the same it'll just find another handler or commit die
+       * 
+       * - FiRe
+       */
       std::string key = handler.first;
       if (key.length() < method.length()) continue;
       std::string handlerPath = key.substr(0, key.length()-method.length());
       if (key.substr(key.length()-method.length()) != method) continue;
-      bool vars = false;
-      std::string buf = handlerPath;
-      while (buf.find("{") != std::string::npos) {
-        std::string variable = buf.substr(buf.find("{")+1, buf.find("}")-buf.find("{")-1);
-        std::string value = path.substr(buf.find("{"));
-        queriesMap[variable] = sanitize(value);
-        buf = buf.substr(buf.find("}")+1);
-        vars = true;
+      std::vector<std::string> handlerPathBySlash = split(handlerPath, "/");
+      std::vector<std::string> pathBySlash = split(path, "/");
+      if (handlerPathBySlash.size() != pathBySlash.size()) continue;
+      for (int i=0; i<handlerPathBySlash.size(); i++) {
+        if (handlerPathBySlash[i].substr(0, 1) == "{" && handlerPathBySlash[i].substr(handlerPathBySlash[i].length()-1) == "}") {
+          queriesMap[handlerPathBySlash[i].substr(1, handlerPathBySlash[i].length()-2)] = pathBySlash[i];
+          handlerPathBySlash[i] = pathBySlash[i];
+        }
       }
+      bool matches = true;
+      if (handlerPathBySlash != pathBySlash) matches = false;
       if (handlerPath.find("*") != std::string::npos) {
         std::string wild = handlerPath.substr(0, handlerPath.find("*"));
         if (path.substr(0, wild.length()) != wild) continue;
-      } else if (handlerPath != path && !vars) continue;
+      } else if (handlerPath != path && !matches) continue;
       Request request(sock, &addr, protocol, path, method, buffer, queriesMap);
       ThreadInfo* info = new ThreadInfo();
       info->func = handler.second;
