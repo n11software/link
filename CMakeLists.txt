@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(link C CXX)
+project(link VERSION 1.0.1 LANGUAGES C CXX)
 
 include_directories(Includes)
 
@@ -16,8 +16,9 @@ ADD_LIBRARY(link SHARED ${CPPSourceCode} ${Headers})
 
 set_target_properties(link PROPERTIES PUBLIC_HEADER "${Headers}")
 
-set(LIBRARY_VERSION_MAJOR 1)
-set(LIBRARY_VERSION_MINOR 0.1)
+set_target_properties(link PROPERTIES
+		VERSION ${PROJECT_VERSION}
+		SOVERSION ${PROJECT_VERSION_MAJOR})
 
 # Add install target
 install(TARGETS link
