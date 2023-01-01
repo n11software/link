@@ -12,15 +12,14 @@ file(GLOB_RECURSE Headers Includes/*.h)
 
 set(CMAKE_CXX_FLAGS "-fpic -pthread")
 add_link_options(-pthread)
-ADD_LIBRARY(link SHARED ${CPPSourceCode})
+ADD_LIBRARY(link SHARED ${CPPSourceCode} ${Headers})
 
 set_target_properties(link PROPERTIES PUBLIC_HEADER "${Headers}")
 
 set(LIBRARY_VERSION_MAJOR 1)
 set(LIBRARY_VERSION_MINOR 0.1)
 
-add_custom_command(TARGET link POST_BUILD
-	COMMAND cp liblink.so /usr/lib/
-	COMMAND cp -R Includes/* /usr/include/
-	USES_TERMINAL
-)
+# Add install target
+install(TARGETS link
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
