@@ -1,0 +1,5 @@
+/home/fire/Link/CMakeFiles/link.dir
+/home/fire/Link/CMakeFiles/linktest.dir
+/home/fire/Link/CMakeFiles/test.dir
+/home/fire/Link/CMakeFiles/edit_cache.dir
+/home/fire/Link/CMakeFiles/rebuild_cache.dir

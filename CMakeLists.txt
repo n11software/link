@@ -1,26 +1,21 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.0)
+project(Link)
 
-project(link VERSION 1.0.1 LANGUAGES C CXX)
+# Library
+file(GLOB_RECURSE SOURCES Source/*.cpp)
 
-include_directories(Includes)
+include_directories(Include)
+add_library(link SHARED ${SOURCES})
 
-set(INSTALL_LIBDIR /usr/lib)
-set(INSTALL_INCLUDEDIR /usr/include)
+target_include_directories(link PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
+target_link_libraries(link PUBLIC ssl)
 
-file(GLOB_RECURSE CPPSourceCode Source/*.cpp)
-file(GLOB_RECURSE Headers Includes/*.h)
+# Test
+file(GLOB_RECURSE TEST_SOURCES Test/*.cpp)
 
-set(CMAKE_CXX_FLAGS "-fpic -pthread")
-add_link_options(-pthread)
-ADD_LIBRARY(link SHARED ${CPPSourceCode} ${Headers})
+add_executable(linktest ${TEST_SOURCES})
+target_link_libraries(linktest PRIVATE link)
 
-set_target_properties(link PROPERTIES PUBLIC_HEADER "${Headers}")
+enable_testing()
 
-set_target_properties(link PROPERTIES
-		VERSION ${PROJECT_VERSION}
-		SOVERSION ${PROJECT_VERSION_MAJOR})
-
-# Add install target
-install(TARGETS link
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+add_test(NAME test COMMAND $<TARGET_FILE:linktest>)
