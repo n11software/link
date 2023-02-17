@@ -1,0 +1,12 @@
+.DS_Store
+
+CMakeFiles
+build
+.ninja_deps
+.ninja_log
+CMakeCache.txt
+CTestTestfile.cmake
+build.ninja
+cmake_install.cmake
+liblink.so
+linktest
