@@ -9,4 +9,5 @@ CTestTestfile.cmake
 build.ninja
 cmake_install.cmake
 liblink.so
+liblink.dylib
 linktest
