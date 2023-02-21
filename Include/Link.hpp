@@ -60,7 +60,7 @@ namespace Link {
         private:
             Request* request;
             Response* response;
-            int port = 0;
+            int port;
 
     };
 

@@ -5,6 +5,7 @@ project(Link)
 file(GLOB_RECURSE SOURCES Source/*.cpp)
 
 include_directories(Include)
+include_directories(/usr/local/include)
 add_library(link SHARED ${SOURCES})
 
 set_target_properties(link PROPERTIES CXX_STANDARD 23)
