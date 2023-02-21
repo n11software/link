@@ -22,7 +22,7 @@ Link::Client::Client(Link::Request* request) {
     this->port = 0;
 }
 
-void Link::Client::Send() {
+Link::Response* Link::Client::Send() {
     SSL* ssl;
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in addr;
@@ -41,16 +41,23 @@ void Link::Client::Send() {
     SSL_load_error_strings();
     const SSL_METHOD* method = SSLv23_client_method();
     SSL_CTX* ctx = SSL_CTX_new(method);
+    SSL_CTX_set_cipher_list(ctx, "TLS_AES_256_GCM_SHA384");
+    SSL_CTX_set_max_proto_version(ctx, TLS1_3_VERSION);
     ssl = SSL_new(ctx);
     int newsock = SSL_get_fd(ssl);
     SSL_set_fd(ssl, sock);
-    SSL_connect(ssl);
+    SSL_set_tlsext_host_name(ssl, this->request->GetDomain().c_str());
+    int error = SSL_connect(ssl);
+    if (error < 0) std::cout << "SSL connection failed" << std::endl;
+    else std::cout << "SSL connection established" << std::endl;
 
     std::string request = this->request->GetMethod() + " " + this->request->GetPath() + " HTTP/1.1\r\n";
     request += "Host: " + this->request->GetDomain() + "\r\n";
     request += "User-Agent: Link/2.0.0\r\n\r\n";
 
-    if (SSL_write(ssl, request.c_str(), request.length()) < 0) std::cout << "Write failed" << std::endl;
+    int status = SSL_write(ssl, request.c_str(), strlen(request.c_str()));
+
+    if (status < 0) std::cout << "Write failed: " << status << std::endl;
 
     int flags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL, flags | O_NONBLOCK);
@@ -64,14 +71,14 @@ void Link::Client::Send() {
         if (bytes > 0) response += std::string(buffer, bytes);
     }
 
-    std::string body;
+    std::string body, headers;
 
     std::string lower = response;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
     if (lower.find("transfer-encoding: chunked") != std::string::npos) {
+        std::cout << "This website is chunked so it might not load" << std::endl;
         // Needs serious fixes
-        std::cout << "Chunked" << std::endl;
         int chunkSize = 0;
         body = response.substr(response.find("\r\n\r\n") + 4);
         // Check if we have the chunk size
@@ -93,20 +100,20 @@ void Link::Client::Send() {
                 }
             }
         }
-        std::cout << "Chunk size: " << chunkSize << std::endl;
 
         // Read the chunk
         remaining = chunkSize;
         while (remaining > 0) {
-            int bytes = SSL_read(ssl, buffer, remaining>1024?1024:remaining);
+            int bytes = SSL_read(ssl, buffer, 1024);
             if (bytes > 0) {
                 body += std::string(buffer, bytes);
                 remaining -= bytes;
             }
+            // Some reason this loop is infinite
         }
+
+        headers = response.substr(0, response.find("\r\n\r\n"));
     } else {
-        std::cout << "Normal" << std::endl;
-        std::cout << response.substr(response.find("Content-Length: ") + 16) << std::endl;
         remaining = std::stoi(response.substr(response.find("Content-Length: ") + 16, response.find("\r\n", response.find("Content-Length: ") + 16) - response.find("Content-Length: ") - 16));
 
         while (remaining > 0) {
@@ -116,13 +123,16 @@ void Link::Client::Send() {
                 remaining -= bytes;
             }
         }
+
+        body = response.substr(response.find("\r\n\r\n") + 4);
+        headers = response.substr(0, response.find("\r\n\r\n"));
     }
 
-    std::cout << response << std::endl;
-
+    Response* res = new Response(headers, body);
 
     SSL_shutdown(ssl);
     SSL_free(ssl);
     SSL_CTX_free(ctx);
     close(sock);
+    return res;
 }

@@ -7,13 +7,10 @@ int main(int argc, char** argv) {
         return 1;
     }
     Link::Request request(argv[1]);
-    std::cout << request.GetURL() << std::endl;
-    std::cout << request.GetProtocol() << std::endl;
-    std::cout << request.GetDomain() << std::endl;
-    std::cout << request.GetPath() << std::endl;
-
     Link::Client client(&request);
-    client.Send();
+    Link::Response* response = client.Send();
+
+    std::cout << response->GetBody() << std::endl;
 
     return 0;
 }

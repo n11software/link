@@ -41,16 +41,30 @@ namespace Link {
     class Response {
 
         public:
-            
-        private:
+            Response(std::string headers, std::string body);
 
+            Response* SetHeader(std::string key, std::string value),
+                    * SetBody(std::string body),
+                    * SetHeadersRaw(std::string headersRaw),
+                    * SetStatus(int status),
+                    * SetVersion(std::string version);
+
+            std::string GetHeader(std::string key),
+                        GetBody(),
+                        GetHeadersRaw(),
+                        GetVersion();
+            int GetStatus();
+        private:
+            std::map<std::string, std::string> headers;
+            std::string body, headersRaw, version;
+            int status;
     };
 
     class Client {
 
         public:
             Client(Request* request);
-            void Send();
+            Link::Response* Send();
 
             Request* SetPort(int port);
             int GetPort();
