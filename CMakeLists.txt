@@ -13,6 +13,14 @@ set_target_properties(link PROPERTIES CXX_STANDARD 23)
 target_include_directories(link PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_link_libraries(link PUBLIC ssl)
 
+
+install(TARGETS link
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Include/
+        DESTINATION /usr/local/include
+        FILES_MATCHING PATTERN "*.hpp")
+
 # Test
 file(GLOB_RECURSE TEST_SOURCES Test/*.cpp)
 
