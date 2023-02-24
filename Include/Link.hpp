@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <openssl/ssl.h>
 
 namespace Link {
     
@@ -72,9 +73,12 @@ namespace Link {
             Request* GetRequest();
             Response* GetResponse();
         private:
+            int Write(const void* buf, size_t count);
+            int Read(void* buf, size_t count);
             Request* request;
             Response* response;
-            int port;
+            SSL* ssl;
+            int port, sock;
 
     };
 
