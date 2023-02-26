@@ -75,6 +75,7 @@ namespace Link {
         private:
             int Write(const void* buf, size_t count);
             int Read(void* buf, size_t count);
+            bool getChunkSize(int& remaining, std::string& body);
             Request* request;
             Response* response;
             SSL* ssl;

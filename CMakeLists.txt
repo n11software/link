@@ -11,7 +11,7 @@ add_library(link SHARED ${SOURCES})
 set_target_properties(link PROPERTIES CXX_STANDARD 23)
 
 target_include_directories(link PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
-target_link_libraries(link PUBLIC ssl)
+target_link_libraries(link PUBLIC ssl z)
 
 
 install(TARGETS link

@@ -1,6 +1,7 @@
 #include <Link.hpp>
 #include <iostream>
 #include <sstream>
+#include <zlib.h>
 
 Link::Response::Response(std::string header, std::string body) {
     this->SetHeadersRaw(header)->SetBody(body);
@@ -12,7 +13,59 @@ Link::Response* Link::Response::SetHeader(std::string key, std::string value) {
     return this;
 }
 
+std::string decompress(std::string data) {
+    z_stream strm;
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    strm.avail_in = data.size();
+    strm.next_in = (Bytef*)data.data();
+    inflateInit2(&strm, 16 + MAX_WBITS);
+    char outbuffer[32768];
+    std::string outstring;
+    do {
+        strm.avail_out = 32768;
+        strm.next_out = (Bytef*)outbuffer;
+        inflate(&strm, Z_NO_FLUSH);
+        if (outstring.size() < strm.total_out) {
+            outstring.append(outbuffer, strm.total_out - outstring.size());
+        }
+    } while (strm.avail_out == 0);
+    inflateEnd(&strm);
+    return outstring;
+}
+
+std::string deflate(std::string data) {
+    z_stream strm;
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    strm.avail_in = data.size();
+    strm.next_in = (Bytef*)data.data();
+    deflateInit2(&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
+    char outbuffer[32768];
+    std::string outstring;
+    do {
+        strm.avail_out = 32768;
+        strm.next_out = (Bytef*)outbuffer;
+        deflate(&strm, Z_FINISH);
+        if (outstring.size() < strm.total_out) {
+            outstring.append(outbuffer, strm.total_out - outstring.size());
+        }
+    } while (strm.avail_out == 0);
+    deflateEnd(&strm);
+    return outstring;
+}
+
 Link::Response* Link::Response::SetBody(std::string body) {
+    if (this->GetHeader("Content-Encoding") == "gzip") {
+        this->body = decompress(body);
+        return this;
+    }
+    if (this->GetHeader("Content-Encoding") == "deflate") {
+        this->body = deflate(body);
+        return this;
+    }
     this->body = body;
     return this;
 }
@@ -24,13 +77,13 @@ Link::Response* Link::Response::SetHeadersRaw(std::string headersRaw) {
     line = line.substr(line.find(" ") + 1);
     this->status = std::stoi(line.substr(0, line.find(" ")));
     
-    // get headers line by line by using getline
     std::istringstream iss(headersRaw.substr(headersRaw.find("\r\n") + 2));
     std::string l;
     while (std::getline(iss, l)) {
         if (l == "") break;
         std::string key = l.substr(0, l.find(":"));
         std::string value = l.substr(l.find(":") + 2);
+        value = value.substr(0, value.find("\r"));
         this->SetHeader(key, value);
     }
     

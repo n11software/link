@@ -35,6 +35,34 @@ int Link::Client::Read(void* buf, size_t count) {
 const SSL_METHOD* method = SSLv23_client_method();
 SSL_CTX* ctx = SSL_CTX_new(method);
 
+bool Link::Client::getChunkSize(int& remaining, std::string& body) {
+    std::string chunkSizeStr = "";
+    char buffer[1];
+    while (chunkSizeStr.find("\r\n") == std::string::npos) {
+        int bytes = Read(buffer, 1);
+        switch(buffer[0]) {
+            case '\r':
+            case '\n':
+                if (chunkSizeStr == "" || chunkSizeStr == "\r" || chunkSizeStr == "\n") {
+                    chunkSizeStr = "";
+                    // body += buffer[0];
+                    continue;
+                }
+            case 'a'...'f':
+            case 'A'...'F':
+            case '0'...'9':
+                chunkSizeStr += buffer[0];
+                break;
+            default:
+                body += buffer[0];
+                break;
+        }
+    }
+    remaining = std::stoi(chunkSizeStr, 0, 16);
+    if (remaining == 0) return true;
+    return false;
+}
+
 Link::Response* Link::Client::Send() {
     this->sock = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in addr;
@@ -43,7 +71,6 @@ Link::Response* Link::Client::Send() {
     else addr.sin_port = htons(this->port);
     struct hostent* ipv4 = gethostbyname(this->request->GetDomain().c_str());
     addr.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)ipv4->h_addr_list[0]));
-    std::cout << inet_ntoa(*(struct in_addr*)ipv4->h_addr_list[0]) << std::endl;
     
     socklen_t socklen = sizeof(addr);
     if (connect(sock, (struct sockaddr*)&addr, socklen) < 0) std::cout << "Connection failed" << std::endl;
@@ -60,12 +87,18 @@ Link::Response* Link::Client::Send() {
         SSL_set_tlsext_host_name(ssl, this->request->GetDomain().c_str());
         int error = SSL_connect(ssl);
         if (error < 0) std::cout << "SSL connection failed" << std::endl;
-        else std::cout << "SSL connection established" << std::endl;
     }
 
     std::string request = this->request->GetMethod() + " " + this->request->GetPath() + " HTTP/1.1\r\n";
-    request += "Host: " + this->request->GetDomain() + "\r\n";
-    request += "User-Agent: Link/2.0.0\r\n\r\n";
+    this->request->SetHeader("Host", this->request->GetDomain());
+    this->request->SetHeader("Connection", "close");
+    this->request->SetHeader("Accept", "*/*");
+    this->request->SetHeader("Accept-Encoding", "gzip, deflate");
+    this->request->SetHeader("Accept-Language", "en-US,en;q=0.9");
+    this->request->SetHeader("User-Agent", "Link/2.0.0");
+    request += this->request->GetRawHeaders();
+    request += "\r\n";
+    request += this->request->GetBody();
     
     int status = Write(request.c_str(), strlen(request.c_str()));
     if (status < 0) std::cout << "Write failed: " << status << std::endl;
@@ -78,7 +111,7 @@ Link::Response* Link::Client::Send() {
     std::string response;
 
     while (response.find("\r\n\r\n") == std::string::npos) {
-        int bytes = Read(buffer, 1024);
+        int bytes = Read(buffer, 1);
         if (bytes > 0) response += std::string(buffer, bytes);
     }
 
@@ -88,15 +121,42 @@ Link::Response* Link::Client::Send() {
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
     if (lower.find("transfer-encoding: chunked") != std::string::npos) {
-        // Stupid way to do this but most efficient and reliable
-
-        while (response.find("\r\n0\r\n\r\n") == std::string::npos) {
-            int bytes = Read(buffer, 1024);
-            if (bytes > 0) response += std::string(buffer, bytes);
-        }
-
+        /*
+         * Finally figured out how to do this
+         * This should not be a problem anymore
+         * - FiRe
+         */
+        // Check for the first chunk size
         headers = response.substr(0, response.find("\r\n\r\n"));
         body = response.substr(response.find("\r\n\r\n") + 4, response.find("\r\n0\r\n\r\n") - response.find("\r\n\r\n") - 4);
+        if (body.substr(0, body.find("\r\n")).length() > 0) {
+            // We have a chunk size
+            /*
+             * This check is no longer needed, but I'm leaving it here for now
+             * - FiRe
+             */
+            remaining = std::stoi(body.substr(0, body.find("\r\n")), 0, 16);
+        } else {
+            // Need to find the next chunk size
+            getChunkSize(remaining, body);
+        }
+        while (remaining > 0) {
+            int bytes = Read(buffer, remaining>1024?1024:remaining);
+            if (bytes > 0) {
+                body += std::string(buffer, bytes);
+                remaining -= bytes;
+            }
+        }
+        
+        while (!getChunkSize(remaining, body)) {
+            while (remaining > 0) {
+                int bytes = Read(buffer, remaining>1024?1024:remaining);
+                if (bytes > 0) {
+                    body += std::string(buffer, bytes);
+                    remaining -= bytes;
+                }
+            }
+        }
     } else {
         remaining = std::stoi(response.substr(response.find("Content-Length: ") + 16, response.find("\r\n", response.find("Content-Length: ") + 16) - response.find("Content-Length: ") - 16));
         remaining-=response.substr(response.find("\r\n\r\n") + 4).length();
