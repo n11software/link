@@ -2,24 +2,27 @@
 #include <iostream>
 #include <fstream>
 
-std::string replace(std::string data, std::string delimiter, std::string replacement) {
-  size_t pos = 0;
-  while ((pos = data.find(delimiter)) != std::string::npos) {
-    data.replace(pos, delimiter.length(), replacement);
-  }
-  return data;
-}
+int main() {
+    {
+        Link::Request request("https://google.com/");
+        Link::Client client(&request);
+        Link::Response* response = (Link::Response*)malloc(sizeof(Link::Response));
+        response = client.Send();
 
-int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::cout << "Usage: " << argv[0] << " <url>" << std::endl;
-        return 1;
+        std::cout << response->GetBody() << std::endl;
+
+        free(response);
     }
-    Link::Request request(argv[1]);
-    Link::Client client(&request);
-    Link::Response* response = client.Send();
 
-    std::cout << response->GetBody() << std::endl;
+    {
+        Link::Request request("https://example.com/");
+        Link::Client client(&request);
+        Link::Response* response = (Link::Response*)malloc(sizeof(Link::Response));
+        response = client.Send();
 
+        std::cout << response->GetBody() << std::endl;
+
+        free(response);
+    }
     return 0;
 }

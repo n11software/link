@@ -22,6 +22,28 @@ Link::Client::Client(Link::Request* request) {
     this->port = 0;
 }
 
+Link::Request* Link::Client::SetPort(int port) {
+    this->port = port;
+    return this->request;
+}
+
+Link::Request* Link::Client::SetRequest(Link::Request* request) {
+    this->request = request;
+    return this->request;
+}
+
+int Link::Client::GetPort() {
+    return this->port;
+}
+
+Link::Request* Link::Client::GetRequest() {
+    return this->request;
+}
+
+Link::Response* Link::Client::GetResponse() {
+    return this->response;
+}
+
 int Link::Client::Write(const void* buf, size_t count) {
     if (this->request->GetProtocol() == "https") return SSL_write((SSL*)ssl, buf, count);
     else return write(sock, buf, count);
@@ -31,9 +53,6 @@ int Link::Client::Read(void* buf, size_t count) {
     if (this->request->GetProtocol() == "https") return SSL_read((SSL*)ssl, buf, count);
     else return read(sock, buf, count);
 }
-
-const SSL_METHOD* method = SSLv23_client_method();
-SSL_CTX* ctx = SSL_CTX_new(method);
 
 bool Link::Client::getChunkSize(int& remaining, std::string& body) {
     std::string chunkSizeStr = "";
@@ -64,10 +83,13 @@ bool Link::Client::getChunkSize(int& remaining, std::string& body) {
 }
 
 Link::Response* Link::Client::Send() {
+    ssl = (SSL*) malloc(sizeof(SSL*));
+    SSL_CTX* ctx = (SSL_CTX*) malloc(sizeof(SSL_CTX*));
+    ctx = SSL_CTX_new(SSLv23_client_method());
     this->sock = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    if (this->port==0) addr.sin_port = htons(this->request->GetProtocol()=="https"?443:80);
+    if (this->port==0) addr.sin_port = htons(this->request->GetProtocol()=="https"?443:80); // TODO: Parse port from URL
     else addr.sin_port = htons(this->port);
     struct hostent* ipv4 = gethostbyname(this->request->GetDomain().c_str());
     addr.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)ipv4->h_addr_list[0]));
@@ -79,7 +101,7 @@ Link::Response* Link::Client::Send() {
         SSL_library_init();
         SSLeay_add_ssl_algorithms();
         SSL_load_error_strings();
-        SSL_CTX_set_cipher_list(ctx, "TLS_AES_256_GCM_SHA384");
+        // SSL_CTX_set_cipher_list(ctx, "TLS_AES_256_GCM_SHA384");
         SSL_CTX_set_max_proto_version(ctx, TLS1_3_VERSION);
         ssl = SSL_new(ctx);
         int newsock = SSL_get_fd(ssl);
@@ -89,7 +111,7 @@ Link::Response* Link::Client::Send() {
         if (error < 0) std::cout << "SSL connection failed" << std::endl;
     }
 
-    std::string request = this->request->GetMethod() + " " + this->request->GetPath() + " HTTP/1.1\r\n";
+    std::string request = this->request->GetMethod() + " " + this->request->GetPath() + " HTTP/1.1\r\n"; // TODO: Add HTTP version variable
     this->request->SetHeader("Host", this->request->GetDomain());
     this->request->SetHeader("Connection", "close");
     this->request->SetHeader("Accept", "*/*");

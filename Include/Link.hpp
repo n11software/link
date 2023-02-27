@@ -67,7 +67,8 @@ namespace Link {
             Client(Request* request);
             Link::Response* Send();
 
-            Request* SetPort(int port);
+            Request* SetPort(int port),
+                   * SetRequest(Request* request);
             int GetPort();
 
             Request* GetRequest();
