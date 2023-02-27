@@ -1,5 +1,5 @@
 # Link
-Link is a web library for C++ built with a focus of speed.
+Link is a web server library for C++ built with a focus of speed.
 
 # Build and Install Link
 Make sure you install CMake, GCC, Ninja, and OpenSSL.
@@ -14,5 +14,12 @@ Make sure you install CMake, GCC, Ninja, and OpenSSL.
 ```
 $ mkdir build && cd build
 $ cmake -GNinja ..
-$ ninja && ninja install
+$ ninja && sudo ninja install
 ```
+>   ------------------------------------------------------------------------------
+>
+>   **NOTE**: *By default, CMake's install prefix is* `/usr/local`*. You can change
+>   change this by invoking something like* `cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -GNinja ..`
+>   *which changes the install prefix to* `/usr`*. You may change this to your needs.*
+>
+>   ------------------------------------------------------------------------------
