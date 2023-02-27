@@ -1,7 +1,7 @@
 # Link
 Link is a web server library for C++ built with a focus of speed.
 
-# Build and Install Link
+## Build and Install Link
 Make sure you install CMake, GCC, Ninja, and OpenSSL.
 
 >   ------------------------------------------------------------------------------
@@ -23,3 +23,6 @@ $ ninja && sudo ninja install
 >   *which changes the install prefix to* `/usr`*. You may change this to your needs.*
 >
 >   ------------------------------------------------------------------------------
+
+## License
+Link is licensed under the BSD 3-Clause License. See LICENSE for more information.
