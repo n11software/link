@@ -2,7 +2,7 @@
 Link is a web server library for C++ built with a focus of speed.
 
 ## Build and Install Link
-Make sure you install CMake, GCC, Ninja, and OpenSSL.
+Make sure you install CMake, GCC, Ninja, zlib, and OpenSSL.
 
 >   ------------------------------------------------------------------------------
 >
