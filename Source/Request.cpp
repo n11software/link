@@ -47,6 +47,16 @@ Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
         i++;
     }
     if (this->GetHeader("Host") != "") this->SetURL(this->GetHeader("Host") + this->path);
+    if (this->path.find("?") != std::string::npos) {
+        std::string queries = this->path.substr(this->path.find("?") + 1);
+        std::stringstream stream(queries);
+        while (std::getline(stream, line, '&')) {
+            std::string key = line.substr(0, line.find("="));
+            std::string value = line.substr(line.find("=") + 1);
+            this->SetParam(decodeHTTP(key), decodeHTTP(value));
+        }
+        SetPath(this->path.substr(0, this->path.find("?")));
+    }
     return this;
 }
 
