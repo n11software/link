@@ -3,6 +3,10 @@
 #include <sstream>
 #include <zlib.h>
 
+Link::Response::Response() {
+    this->SetHeadersRaw("HTTP/1.1 200 OK\r\n")->SetBody("");
+}
+
 Link::Response::Response(std::string header, std::string body) {
     this->SetHeadersRaw(header)->SetBody(body);
 }
@@ -58,6 +62,7 @@ std::string deflate(std::string data) {
 }
 
 Link::Response* Link::Response::SetBody(std::string body) {
+    this->SetHeader("Content-Length", std::to_string(body.size()));
     if (this->GetHeader("Content-Encoding") == "gzip") {
         this->body = decompress(body);
         return this;
@@ -111,7 +116,11 @@ std::string Link::Response::GetBody() {
 }
 
 std::string Link::Response::GetHeadersRaw() {
-    return this->headersRaw;
+    std::string headers = this->version + " " + std::to_string(this->status) + " " + Link::Status(this->status) + "\r\n";
+    for (auto const& x : this->headers) {
+        if (x.second != "") headers += x.first + ": " + x.second + "\r\n";
+    }
+    return headers;
 }
 
 std::string Link::Response::GetVersion() {

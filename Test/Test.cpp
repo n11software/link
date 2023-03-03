@@ -2,27 +2,31 @@
 #include <iostream>
 #include <fstream>
 
-int main() {
-    {
-        Link::Request request("https://google.com/");
-        Link::Client client(&request);
-        Link::Response* response = (Link::Response*)malloc(sizeof(Link::Response));
-        response = client.Send();
-
+int main(int argc, char** argv) {
+    bool server = true;
+    bool https = false;
+    if (argc > 1) {
+        if (std::string(argv[1]) == "server") server = true;
+        if (std::string(argv[1]) == "https") https = true;
+    }
+    if (server) {
+        Link::Server server(8080);
+        // server.SetStaticPages("public/");
+        server.Get("/", [](Link::Request* request, Link::Response* response) {
+            response->SetBody("Hello, world!");
+        });
+        server.Get("/:message", [](Link::Request* request, Link::Response* response) {
+            response->SetBody(request->GetParam("message"));
+        });
+        server.EnableSSL("certificate.pem", "key.pem");
+        server.Start();
+    } else {
+        Link::Request* request = new Link::Request(https?"https://localhost/":"http://localhost/");
+        Link::Client client(request);
+        client.SetPort(8080);
+        Link::Response* response = client.Send();
         std::cout << response->GetBody() << std::endl;
-
-        free(response);
     }
 
-    {
-        Link::Request request("https://example.com/");
-        Link::Client client(&request);
-        Link::Response* response = (Link::Response*)malloc(sizeof(Link::Response));
-        response = client.Send();
-
-        std::cout << response->GetBody() << std::endl;
-
-        free(response);
-    }
     return 0;
 }

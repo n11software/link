@@ -180,7 +180,7 @@ Link::Response* Link::Client::Send() {
             }
         }
     } else {
-        remaining = std::stoi(response.substr(response.find("Content-Length: ") + 16, response.find("\r\n", response.find("Content-Length: ") + 16) - response.find("Content-Length: ") - 16));
+        remaining = std::stoi(lower.substr(lower.find("content-length: ") + 16, lower.find("\r\n", lower.find("content-length: ") + 16) - lower.find("content-length: ") - 16));
         remaining-=response.substr(response.find("\r\n\r\n") + 4).length();
         if (remaining > 0) {
             while (remaining > 0) {

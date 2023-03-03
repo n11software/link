@@ -1,7 +1,28 @@
 #include <Link.hpp>
+#include <iostream>
+#include <sstream>
 
-Link::Request::Request() {
-    this->SetURL("")->SetMethod("GET");
+Link::Request::Request(std::string headers, std::string body) {
+    this->SetHeadersRaw(headers)->SetBody(body);
+}
+
+Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
+    std::string line;
+    std::stringstream stream(headersRaw);
+    int i = 0;
+    while (std::getline(stream, line)) {
+        if (i == 0) {
+            this->SetMethod(line.substr(0, line.find(" ")));
+            this->SetVersion(line.substr(line.find("HTTP/") + 5));
+            this->SetPath(line.substr(line.find(" ") + 1));
+            this->SetPath(this->GetPath().substr(0, this->GetPath().find(" ")));
+        } else {
+            this->SetHeader(line.substr(0, line.find(": ")), line.substr(line.find(": ") + 2));
+        }
+        i++;
+    }
+    if (this->GetHeader("Host") != "") this->SetURL(this->GetHeader("Host") + this->path);
+    return this;
 }
 
 Link::Request::Request(std::string url) {
@@ -20,12 +41,14 @@ Link::Request* Link::Request::SetURL(std::string url) {
 }
 
 Link::Request* Link::Request::SetMethod(std::string method) {
-    this->headers["Method"] = method;
+    this->method = method;
     return this;
 }
 
 Link::Request* Link::Request::SetHeader(std::string key, std::string value) {
-    this->headers[key] = value;
+    std::string lower = key;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    this->headers[lower] = value;
     return this;
 }
 
@@ -77,11 +100,13 @@ std::string Link::Request::GetURL() {
 }
 
 std::string Link::Request::GetMethod() {
-    return this->headers["Method"];
+    return this->method;
 }
 
 std::string Link::Request::GetHeader(std::string key) {
-    return this->headers[key];
+    std::string lower = key;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    return this->headers[lower];
 }
 
 std::string Link::Request::GetCookie(std::string key) {
@@ -104,10 +129,20 @@ std::string Link::Request::GetRawHeaders() {
 
 std::string Link::Request::GetRawParams() {
     std::string res = "";
+    res += this->method + " " + this->path + " " + this->version + "\r\n";
     for (auto it = this->params.begin(); it != this->params.end(); it++) res += it->first + "=" + it->second + "&";
     return res.substr(0, res.length() - 1);
 }
 
 std::string Link::Request::GetRawBody() {
     return this->body;
+}
+
+std::string Link::Request::GetVersion() {
+    return this->version;
+}
+
+Link::Request* Link::Request::SetVersion(std::string version) {
+    this->version = version;
+    return this;
 }

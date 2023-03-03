@@ -8,10 +8,10 @@ include_directories(Include)
 include_directories(/usr/local/include)
 add_library(link SHARED ${SOURCES})
 
-set_target_properties(link PROPERTIES CXX_STANDARD 23)
+target_compile_features(link PUBLIC cxx_std_17)
 
 target_include_directories(link PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
-target_link_libraries(link PUBLIC ssl z)
+target_link_libraries(link PUBLIC ssl crypto z)
 
 
 install(TARGETS link

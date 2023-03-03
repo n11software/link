@@ -3,13 +3,14 @@
 #include <vector>
 #include <map>
 #include <openssl/ssl.h>
+#include <functional>
 
 namespace Link {
     
     class Request {
 
         public:
-            Request();
+            Request(std::string headers, std::string body);
             Request(std::string url);
 
             Link::Request* SetURL(std::string url),
@@ -20,7 +21,9 @@ namespace Link {
                          * SetBody(std::string body),
                          * SetPath(std::string path),
                          * SetProtocol(std::string protocol),
-                         * SetDomain(std::string domain);
+                         * SetDomain(std::string domain),
+                         * SetVersion(std::string version),
+                         * SetHeadersRaw(std::string headersRaw);
                          
             std::string GetURL(),
                         GetMethod(),
@@ -30,18 +33,20 @@ namespace Link {
                         GetBody(),
                         GetPath(),
                         GetProtocol(),
-                        GetDomain();
+                        GetDomain(),
+                        GetVersion();
             
             std::string GetRawHeaders(), GetRawParams(), GetRawBody();
         private:
             std::map<std::string, std::string> headers, cookies, params;
-            std::string body, protocol, path, domain, url;
+            std::string body, protocol, path, domain, url, method, version;
 
     };
 
     class Response {
 
         public:
+            Response();
             Response(std::string headers, std::string body);
 
             Response* SetHeader(std::string key, std::string value),
@@ -83,5 +88,56 @@ namespace Link {
             int port, sock;
 
     };
+
+    class Server {
+
+        public:
+            Server();
+            Server(int port);
+
+            Server* SetPort(int port),
+                  * Start(),
+                  * Stop(),
+                  * EnableMultiThreaded(),
+                  * DisableMultiThreaded(),
+                  * EnableSSL(std::string certPath, std::string keyPath),
+                  * Get(std::string path, std::function<void(Request*, Response*)> callback),
+                  * Post(std::string path, std::function<void(Request*, Response*)> callback),
+                  * Route(std::string method, std::string path, std::function<void(Request*, Response*)> callback),
+                  * Error(int status, std::function<void(Request*, Response*)> callback),
+                  * SetStaticPages(std::string path);
+
+            int GetPort();
+            std::map<std::vector<std::string>, std::function<void(Request*, Response*)>> GetCallbacks();
+            std::vector<std::string> GetStaticPages();
+            std::map<int, std::function<void(Request*, Response*)>> GetErrors();
+            bool IsRunning(), IsMultiThreaded(), IsSSL();
+            std::string GetStaticPagesDirectory();
+        private:
+            int port, sock;
+            SSL_CTX* ctx;
+            bool running, sslEnabled, multiThreaded;
+            std::string certPath, keyPath, staticPages;
+            std::map<std::vector<std::string>, std::function<void(Request*, Response*)>> callbacks;
+            std::map<int, std::function<void(Request*, Response*)>> errors;
+    };
+
+    class Thread {
+
+        public:
+            Thread(Server* server, int sock, bool sslEnabled);
+            Thread(Server* server, SSL* ssl, bool sslEnabled);
+            void Run();
+        private:
+            int Write(const void* buf, size_t count);
+            int Read(void* buf, size_t count);
+            Server* server;
+            SSL* ssl;
+            bool sslEnabled;
+            int sock;
+    };
+
+    std::string Status(int status);
+    std::string GetMIMEType(std::string path);
 
 }
