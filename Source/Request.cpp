@@ -6,6 +6,31 @@ Link::Request::Request(std::string headers, std::string body) {
     this->SetHeadersRaw(headers)->SetBody(body);
 }
 
+std::string decodeHTTP(std::string &src) {
+    std::replace(src.begin(), src.end(), '+', ' ');
+    std::string ret;
+    char ch;
+    int i, ii;
+    for (i=0;i<src.length();i++) {
+        if (int(src[i])=='%') {
+            switch (src[i+1]) {
+                case '0'...'9':
+                case 'a'...'f':
+                case 'A'...'F':
+                    break;
+                default:
+                    ret += '%';
+                    continue;
+            }
+            sscanf(src.substr(i+1,2).c_str(), "%x", &ii);
+            ch=static_cast<char>(ii);
+            ret+=ch;
+            i=i+2;
+        } else ret+=src[i];
+    }
+    return (ret);
+}
+
 Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
     std::string line;
     std::stringstream stream(headersRaw);
@@ -14,8 +39,8 @@ Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
         if (i == 0) {
             this->SetMethod(line.substr(0, line.find(" ")));
             this->SetVersion(line.substr(line.find("HTTP/") + 5));
-            this->SetPath(line.substr(line.find(" ") + 1));
-            this->SetPath(this->GetPath().substr(0, this->GetPath().find(" ")));
+            std::string path = line.substr(line.find(" ") + 1);
+            this->SetPath(path.substr(0, path.find(" ")));
         } else {
             this->SetHeader(line.substr(0, line.find(": ")), line.substr(line.find(": ") + 2));
         }
@@ -69,6 +94,7 @@ Link::Request* Link::Request::SetBody(std::string body) {
 
 Link::Request* Link::Request::SetPath(std::string path) {
     if (path[0] != '/') path = "/" + path;
+    path = decodeHTTP(path);
     this->SetURL(this->protocol + "://" + this->domain + path);
     return this;
 }
