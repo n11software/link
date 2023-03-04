@@ -15,11 +15,10 @@ target_include_directories(link PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_link_libraries(link PUBLIC ssl crypto z)
 
 
-install(TARGETS link
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS link LIBRARY DESTINATION /usr/lib)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Include/
-        DESTINATION /usr/local/include
+        DESTINATION /usr/include
         FILES_MATCHING PATTERN "*.hpp")
 
 # Test
