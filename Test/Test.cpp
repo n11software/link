@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
     }
     if (server) {
         Link::Server server(8080);
-        // server.SetStaticPages("public/");
+        server.SetStaticPages("public/");
         server.Get("/", [](Link::Request* request, Link::Response* response) {
             if (request->GetParam("message") != "") response->SetBody(request->GetParam("message"));
             else response->SetBody("Hello, world!");

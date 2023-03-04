@@ -139,8 +139,10 @@ std::string Link::Server::GetStaticPagesDirectory() {
 std::vector<std::string> Link::Server::GetStaticPages() {
     if (this->staticPages == "" || !std::filesystem::exists(this->staticPages)) return std::vector<std::string>();
     std::vector<std::string> pages;
-    for (const auto& entry : std::filesystem::directory_iterator(this->staticPages)) {
-        pages.push_back(entry.path());
+    // recursively iterate through the directory
+    for (std::filesystem::recursive_directory_iterator i(staticPages), end; i != end; ++i) 
+    if (!std::filesystem::is_directory(i->path())) {
+      pages.push_back(i->path().parent_path().string()+'/'+i->path().filename().string());
     }
     return pages;
 }
