@@ -141,6 +141,9 @@ void Link::Thread::Run() {
                     response->SetBody(content);
                     response->SetStatus(200);
                     response->SetHeader("Content-Type", Link::GetMIMEType(path));
+                    if (response->GetHeader("Content-Type").substr(0,4) == "font" || req->GetPath().substr(0, 5) == "/font") {
+                        response->SetHeader("Access-Control-Allow-Origin", "*")->SetHeader("Cache-Control", "public, max-age=31536000")->SetHeader("Accept-Ranges", "bytes");
+                    }
                 }
                 break;
             }
