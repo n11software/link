@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <functional>
 #include <fstream>
+#include <filesystem>
 
 Link::Server::Server() {
     this->port = 0;
@@ -151,8 +152,6 @@ Link::Server* Link::Server::Start() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     int opt = 1;
     if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) return this;
-
-    signal(SIGPIPE, SIG_IGN);
 
     if (sock < 0) {
         perror("Socket error");
