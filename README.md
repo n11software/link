@@ -24,5 +24,9 @@ $ ninja && sudo ninja install
 >
 >   ------------------------------------------------------------------------------
 
+## Using Link
+<!-- TODO: work on this -->
+You can find a Link website template at [aristonl/linkproj](https://github.com/aristonl/linkproj). See its README for more information.
+
 ## License
 Link is licensed under the BSD 3-Clause License. See LICENSE for more information.
