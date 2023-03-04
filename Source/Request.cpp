@@ -57,6 +57,16 @@ Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
         }
         SetPath(this->path.substr(0, this->path.find("?")));
     }
+    if (this->GetHeader("Cookie") != "") {
+        std::string cookies = this->GetHeader("Cookie");
+        std::stringstream stream(cookies);
+        while (std::getline(stream, line, ';')) {
+            std::string key = line.substr(0, line.find("="));
+            if (key[0] == ' ') key = key.substr(1);
+            std::string value = line.substr(line.find("=") + 1);
+            this->SetCookie(decodeHTTP(key), decodeHTTP(value));
+        }
+    }
     return this;
 }
 
