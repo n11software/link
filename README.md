@@ -18,9 +18,9 @@ $ ninja && sudo ninja install
 ```
 >   ------------------------------------------------------------------------------
 >
->   **NOTE**: *By default, CMake's install prefix is* `/usr/local`*. You can change
->   change this by invoking something like* `cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -GNinja ..`
->   *which changes the install prefix to* `/usr`*. You may change this to your needs.*
+>   **NOTE**: *By default, Link's install prefix is* `/usr/`*. You can change
+>   change this by invoking something like* `cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local -GNinja ..`
+>   *which changes the install prefix to* `/usr/local`*. You may change this to your needs.*
 >
 >   ------------------------------------------------------------------------------
 
