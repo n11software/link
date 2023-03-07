@@ -23,7 +23,8 @@ namespace Link {
                          * SetProtocol(std::string protocol),
                          * SetDomain(std::string domain),
                          * SetVersion(std::string version),
-                         * SetHeadersRaw(std::string headersRaw);
+                         * SetHeadersRaw(std::string headersRaw),
+                         * SetIP(std::string ip);
                          
             std::string GetURL(),
                         GetMethod(),
@@ -34,12 +35,13 @@ namespace Link {
                         GetPath(),
                         GetProtocol(),
                         GetDomain(),
-                        GetVersion();
+                        GetVersion(),
+                        GetIP();
             
             std::string GetRawHeaders(), GetRawParams(), GetRawBody();
         private:
             std::map<std::string, std::string> headers, cookies, params;
-            std::string body, protocol, path, domain, url, method, version;
+            std::string body, protocol, path, domain, url, method, version, ip;
 
     };
 
@@ -127,7 +129,7 @@ namespace Link {
         public:
             Thread(Server* server, int sock, bool sslEnabled);
             Thread(Server* server, SSL* ssl, bool sslEnabled);
-            void Run();
+            void SetIP(std::string ip), Run();
         private:
             int Write(const void* buf, size_t count);
             int Read(void* buf, size_t count);
@@ -135,6 +137,7 @@ namespace Link {
             SSL* ssl;
             bool sslEnabled;
             int sock;
+            std::string ip;
     };
 
     std::string Status(int status);

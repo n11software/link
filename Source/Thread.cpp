@@ -44,6 +44,10 @@ std::vector<std::string> split(std::string data, std::string delimiter) {
     return result;
 }
 
+void Link::Thread::SetIP(std::string ip) {
+    this->ip = ip;
+}
+
 void Link::Thread::Run() {
     char buffer[1];
     std::string request = "";
@@ -72,6 +76,7 @@ void Link::Thread::Run() {
     }
 
     req->SetBody(body);
+    req->SetIP(this->ip);
 
     Link::Response* response = new Link::Response();
     response->SetHeader("Content-Type", "text/html");

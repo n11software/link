@@ -192,3 +192,12 @@ Link::Request* Link::Request::SetVersion(std::string version) {
     this->version = version;
     return this;
 }
+
+Link::Request* Link::Request::SetIP(std::string ip) {
+    this->ip = ip;
+    return this;
+}
+
+std::string Link::Request::GetIP() {
+    return this->ip;
+}

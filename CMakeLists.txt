@@ -9,16 +9,16 @@ include_directories(/usr/local/include)
 add_library(link SHARED ${SOURCES})
 
 target_compile_features(link PUBLIC cxx_std_17)
-set (CMAKE_CXX_FLAGS "-lstdc++fs -std=c++17")
+set (CMAKE_CXX_FLAGS "-std=c++17")
 
 target_include_directories(link PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_link_libraries(link PUBLIC ssl crypto z)
 
 
-install(TARGETS link LIBRARY DESTINATION /usr/lib)
+install(TARGETS link LIBRARY DESTINATION /usr/local/lib)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Include/
-        DESTINATION /usr/include
+        DESTINATION /usr/local/include
         FILES_MATCHING PATTERN "*.hpp")
 
 # Test
