@@ -155,6 +155,15 @@ std::string Link::Request::GetHeader(std::string key) {
     return this->headers[lower];
 }
 
+std::string Link::Request::GetRawHeader(std::string key) {
+    return key + ": " + this->headers[key];
+}
+
+Link::Request* Link::Request::SetRawHeader(std::string key, std::string value) {
+    this->headers[key] = value;
+    return this;
+}
+
 std::string Link::Request::GetCookie(std::string key) {
     return this->cookies[key];
 }

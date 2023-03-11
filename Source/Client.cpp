@@ -83,11 +83,12 @@ bool Link::Client::getChunkSize(int& remaining, std::string& body) {
 }
 
 Link::Response* Link::Client::Send() {
-    ssl = (SSL*) malloc(sizeof(SSL*));
-    SSL_CTX* ctx = (SSL_CTX*) malloc(sizeof(SSL_CTX*));
-    ctx = SSL_CTX_new(SSLv23_client_method());
-    this->sock = socket(AF_INET, SOCK_STREAM, 0);
+    SSL_CTX* ctx = NULL;
+    if (this->request->GetProtocol() == "https") {
+        ctx = SSL_CTX_new(SSLv23_client_method());
+    }
     struct sockaddr_in addr;
+    bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
     if (this->port==0) addr.sin_port = htons(this->request->GetProtocol()=="https"?443:80); // TODO: Parse port from URL
     else addr.sin_port = htons(this->port);
@@ -95,6 +96,8 @@ Link::Response* Link::Client::Send() {
     addr.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)ipv4->h_addr_list[0]));
     
     socklen_t socklen = sizeof(addr);
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(sock, (struct sockaddr*)&addr, socklen) < 0) std::cout << "Connection failed" << std::endl;
 
     if (this->request->GetProtocol() == "https") {

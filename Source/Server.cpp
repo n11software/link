@@ -149,6 +149,11 @@ std::vector<std::string> Link::Server::GetStaticPages() {
     return pages;
 }
 
+Link::Server* Link::Server::SetStartMessage(std::string msg) {
+    this->startMessage = msg;
+    return this;
+}
+
 Link::Server* Link::Server::Start() {
     running = true;
     if (this->port == 0) port = sslEnabled ? 443 : 80;
@@ -176,6 +181,8 @@ Link::Server* Link::Server::Start() {
         perror("Listen error");
         exit(1);
     }
+
+    if (startMessage.length() > 0) std::cout << startMessage << std::endl;
 
     while (this->running) {
         struct sockaddr_in client;

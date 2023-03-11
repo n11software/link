@@ -23,6 +23,7 @@ int main(int argc, char** argv) {
         server.Start();
     } else {
         Link::Request* request = new Link::Request(https?"https://localhost/":"http://localhost/");
+        request->SetPath("/login");
         Link::Client client(request);
         client.SetPort(8080);
         Link::Response* response = client.Send();

@@ -24,11 +24,13 @@ namespace Link {
                          * SetDomain(std::string domain),
                          * SetVersion(std::string version),
                          * SetHeadersRaw(std::string headersRaw),
+                         * SetRawHeader(std::string key, std::string value),
                          * SetIP(std::string ip);
                          
             std::string GetURL(),
                         GetMethod(),
                         GetHeader(std::string key),
+                        GetRawHeader(std::string key),
                         GetCookie(std::string key),
                         GetParam(std::string key),
                         GetBody(),
@@ -107,7 +109,8 @@ namespace Link {
                   * Post(std::string path, std::function<void(Request*, Response*)> callback),
                   * Route(std::string method, std::string path, std::function<void(Request*, Response*)> callback),
                   * Error(int status, std::function<void(Request*, Response*)> callback),
-                  * SetStaticPages(std::string path);
+                  * SetStaticPages(std::string path),
+                  * SetStartMessage(std::string message);
 
             int GetPort();
             std::map<std::vector<std::string>, std::function<void(Request*, Response*)>> GetCallbacks();
@@ -119,7 +122,7 @@ namespace Link {
             int port, sock;
             SSL_CTX* ctx;
             bool running, sslEnabled, multiThreaded;
-            std::string certPath, keyPath, staticPages;
+            std::string certPath, keyPath, staticPages, startMessage;
             std::map<std::vector<std::string>, std::function<void(Request*, Response*)>> callbacks;
             std::map<int, std::function<void(Request*, Response*)>> errors;
     };

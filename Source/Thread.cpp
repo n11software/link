@@ -99,11 +99,7 @@ void Link::Thread::Run() {
             std::string reqPath = req->GetPath();
             if (routePath == reqPath) {
                 found = true;
-                try {
-                    route.second(req, response);
-                } catch (std::exception e) {
-                    perror("Link: Error while executing route!");
-                }
+                route.second(req, response);
                 break;
             }
             std::vector<std::string> routePathSplit = split(routePath, "/");
