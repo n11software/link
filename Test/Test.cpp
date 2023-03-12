@@ -3,7 +3,7 @@
 #include <fstream>
 
 int main(int argc, char** argv) {
-    bool server = true;
+    bool server = false;
     bool https = false;
     if (argc > 1) {
         if (std::string(argv[1]) == "server") server = true;
@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
             response->SetBody(request->GetParam("message"));
         });
         server.EnableSSL("certificate.pem", "key.pem");
+        server.SetStartMessage("Server started on port 8080");
         server.Start();
     } else {
         Link::Request* request = new Link::Request(https?"https://localhost/":"http://localhost/");

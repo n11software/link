@@ -3,23 +3,23 @@ project(Link)
 
 # Library
 file(GLOB_RECURSE SOURCES Source/*.cpp)
+file(GLOB_RECURSE INCLUDES Include/*)
 
 include_directories(Include)
-include_directories(/usr/local/include)
+
 add_library(link SHARED ${SOURCES})
+set_target_properties(link PROPERTIES
+    PUBLIC_HEADER ${INCLUDES})
 
 target_compile_features(link PUBLIC cxx_std_17)
 set (CMAKE_CXX_FLAGS "-std=c++17")
 
-target_include_directories(link PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
+target_include_directories(link PUBLIC Include)
 target_link_libraries(link PUBLIC ssl crypto z)
 
-
-install(TARGETS link LIBRARY DESTINATION /usr/local/lib)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Include/
-        DESTINATION /usr/local/include
-        FILES_MATCHING PATTERN "*.hpp")
+install(TARGETS link
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Test
 file(GLOB_RECURSE TEST_SOURCES Test/*.cpp)
