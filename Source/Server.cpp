@@ -87,7 +87,7 @@ struct HandlerArgs {
 
 void HandlerWrapper(void* raw) {
     HandlerArgs* args = (HandlerArgs*) raw;
-    if (args->sslEnabled) {
+    if (args->sslEnabled&&args->ssl!=NULL) {
         Link::Thread thread(args->server, args->ssl, args->sslEnabled);
         thread.SetIP(args->ip);
         thread.Run();
@@ -96,7 +96,6 @@ void HandlerWrapper(void* raw) {
         thread.SetIP(args->ip);
         thread.Run();
     }
-    free(args);
 }
 
 Link::Server* Link::Server::Get(std::string path, std::function<void(Request*, Response*)> callback) {
@@ -221,13 +220,14 @@ Link::Server* Link::Server::Start() {
 
         if (this->multiThreaded) {
             pthread_t thread;
-            HandlerArgs* args = (HandlerArgs*) malloc(sizeof(HandlerArgs));
+            HandlerArgs* args;
             args->server = this;
             args->clientSock = clientSock;
             args->ssl = ssl;
             args->sslEnabled = ClientSSL;
             args->ip = inet_ntoa(client.sin_addr);
             pthread_create(&thread, NULL, (void* (*)(void*)) HandlerWrapper, (void*) args);
+            pthread_join(thread, NULL);
         } else {
             std::string ip = inet_ntoa(client.sin_addr);
             if (ClientSSL) {

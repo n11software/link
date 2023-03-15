@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20.2)
 project(Link)
 
+find_package(OpenSSL REQUIRED)
+
 # Library
 file(GLOB_RECURSE SOURCES Source/*.cpp)
 file(GLOB_RECURSE INCLUDES Include/*)
@@ -15,7 +17,7 @@ target_compile_features(link PUBLIC cxx_std_17)
 set (CMAKE_CXX_FLAGS "-std=c++17")
 
 target_include_directories(link PUBLIC Include)
-target_link_libraries(link PUBLIC ssl crypto z)
+target_link_libraries(link PUBLIC OpenSSL::SSL z)
 
 install(TARGETS link
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
