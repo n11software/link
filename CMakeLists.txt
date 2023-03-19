@@ -21,8 +21,8 @@ target_link_libraries(link PUBLIC OpenSSL::SSL z)
 
 # install
 install(TARGETS link
-    LIBRARY DESTINATION /usr/lib/
-    PUBLIC_HEADER DESTINATION /usr/include/)
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 
 # Test
 file(GLOB_RECURSE TEST_SOURCES Test/*.cpp)
