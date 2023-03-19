@@ -12,5 +12,4 @@ liblink.so
 liblink.dylib
 linktest
 install_manifest.txt
-*.pem
 *.csr
