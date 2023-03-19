@@ -19,9 +19,10 @@ set (CMAKE_CXX_FLAGS "-std=c++17")
 target_include_directories(link PUBLIC Include)
 target_link_libraries(link PUBLIC OpenSSL::SSL z)
 
+# install
 install(TARGETS link
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    LIBRARY DESTINATION /usr/lib/
+    PUBLIC_HEADER DESTINATION /usr/include/)
 
 # Test
 file(GLOB_RECURSE TEST_SOURCES Test/*.cpp)
