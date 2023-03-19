@@ -166,8 +166,6 @@ void Link::Thread::Run() {
 
     std::string res = response->GetVersion() + " " + std::to_string(response->GetStatus()) + " " + Link::Status(response->GetStatus()) + "\r\n";
     res = response->GetHeadersRaw() + "\r\n" + response->GetBody();
-    Write(res.c_str(), res.length());
-    
     if (server->IsDebugging()) {
         clock_gettime(CLOCK_MONOTONIC, &end);
         double time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000.0;
@@ -178,6 +176,7 @@ void Link::Thread::Run() {
         else if (response->GetStatus() >= 500 && response->GetStatus() < 600) color = "\033[35m";
         std::cout << "\033[36m[Link]" << color << " [" << req->GetMethod() << "] " << req->GetPath() << " \033[35m" << time << "ms" << "\033[0m" << std::endl;
     }
+    Write(res.c_str(), res.length());
 
     if (server->IsMultiThreaded()) pthread_exit(NULL);
 }
