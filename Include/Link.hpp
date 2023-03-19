@@ -102,8 +102,8 @@ namespace Link {
             Server* SetPort(int port),
                   * Start(),
                   * Stop(),
-                  * EnableMultiThreaded(),
-                  * DisableMultiThreaded(),
+                  * EnableMultiThreading(),
+                  * DisableMultiThreading(),
                   * EnableSSL(std::string certPath, std::string keyPath),
                   * Get(std::string path, std::function<void(Request*, Response*)> callback),
                   * Post(std::string path, std::function<void(Request*, Response*)> callback),
@@ -130,6 +130,7 @@ namespace Link {
     class Thread {
 
         public:
+            Thread();
             Thread(Server* server, int sock, bool sslEnabled);
             Thread(Server* server, SSL* ssl, bool sslEnabled);
             void SetIP(std::string ip), Run();

@@ -19,19 +19,28 @@ Link::Server::Server() {
 
 Link::Server::Server(int port) {
     this->port = port;
+    this->multiThreaded = true;
+    this->sslEnabled = false;
 }
 
 Link::Server* Link::Server::SetPort(int port) {
     this->port = port;
+    this->multiThreaded = true;
+    this->sslEnabled = false;
     return this;
 }
 
-Link::Server* Link::Server::EnableMultiThreaded() {
+Link::Server* Link::Server::EnableMultiThreading() {
     this->multiThreaded = true;
     return this;
 }
 
-Link::Server* Link::Server::DisableMultiThreaded() {
+Link::Server* Link::Server::Stop() {
+    this->running = false;
+    return this;
+}
+
+Link::Server* Link::Server::DisableMultiThreading() {
     this->multiThreaded = false;
     return this;
 }
@@ -78,24 +87,13 @@ int Link::Server::GetPort() {
 }
 
 struct HandlerArgs {
-    Link::Server* server;
-    int clientSock;
-    SSL* ssl;
-    bool sslEnabled;
-    std::string ip;
+    Link::Thread* thread;
 };
 
 void HandlerWrapper(void* raw) {
     HandlerArgs* args = (HandlerArgs*) raw;
-    if (args->sslEnabled&&args->ssl!=NULL) {
-        Link::Thread thread(args->server, args->ssl, args->sslEnabled);
-        thread.SetIP(args->ip);
-        thread.Run();
-    } else {
-        Link::Thread thread(args->server, args->clientSock, args->sslEnabled);
-        thread.SetIP(args->ip);
-        thread.Run();
-    }
+    Link::Thread* thread = args->thread;
+    thread->Run();
 }
 
 Link::Server* Link::Server::Get(std::string path, std::function<void(Request*, Response*)> callback) {
@@ -199,6 +197,7 @@ Link::Server* Link::Server::Start() {
             char buffer[1];
             int bytes = recv(clientSock, buffer, sizeof(buffer), MSG_PEEK);
             if (buffer[0] == '\x16') {
+                ssl = (SSL*) malloc(sizeof(SSL*));
                 ssl = SSL_new(ctx);
                 SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
                 if (SSL_set_fd(ssl, clientSock) <= 0) {
@@ -220,12 +219,18 @@ Link::Server* Link::Server::Start() {
 
         if (this->multiThreaded) {
             pthread_t thread;
-            HandlerArgs* args;
-            args->server = this;
-            args->clientSock = clientSock;
-            args->ssl = ssl;
-            args->sslEnabled = ClientSSL;
-            args->ip = inet_ntoa(client.sin_addr);
+            std::string ip = inet_ntoa(client.sin_addr);
+            Link::Thread t;
+            if (ClientSSL&&sslEnabled) {
+                t = Link::Thread(this, ssl, ClientSSL);
+                t.SetIP(ip);
+            } else {
+                t = Link::Thread(this, clientSock, ClientSSL);
+                t.SetIP(ip);
+            }
+
+            HandlerArgs* args = new HandlerArgs();
+            args->thread = &t;
             pthread_create(&thread, NULL, (void* (*)(void*)) HandlerWrapper, (void*) args);
             pthread_join(thread, NULL);
         } else {

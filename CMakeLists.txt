@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20.2)
 project(Link)
 
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL 3 REQUIRED)
 
 # Library
 file(GLOB_RECURSE SOURCES Source/*.cpp)

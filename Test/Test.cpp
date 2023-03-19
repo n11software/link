@@ -1,9 +1,14 @@
 #include <Link.hpp>
 #include <iostream>
 #include <fstream>
+#include <openssl/ssl.h>
 
 int main(int argc, char** argv) {
-    bool server = false;
+    if (SSLeay() < 0x30000000L) {
+        std::cout << "OpenSSL version is lower than 3.0.0" << std::endl;
+        return 0;
+    }
+    bool server = true;
     bool https = false;
     if (argc > 1) {
         if (std::string(argv[1]) == "server") server = true;
@@ -20,6 +25,7 @@ int main(int argc, char** argv) {
             response->SetBody(request->GetParam("message"));
         });
         server.EnableSSL("certificate.pem", "key.pem");
+        server.EnableMultiThreading();
         server.SetStartMessage("Server started on port 8080");
         server.Start();
     } else {

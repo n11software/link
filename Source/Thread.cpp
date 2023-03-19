@@ -166,3 +166,5 @@ void Link::Thread::Run() {
     Write(res.c_str(), res.length());
     if (server->IsMultiThreaded()) pthread_exit(NULL);
 }
+
+Link::Thread::Thread() {}
