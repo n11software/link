@@ -71,6 +71,7 @@ Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
 }
 
 Link::Request::Request(std::string url) {
+    this->port = 0;
     this->SetURL(url)->SetMethod("GET");
 }
 
@@ -79,10 +80,25 @@ Link::Request* Link::Request::SetURL(std::string url) {
     this->protocol = url.substr(0, url.find("://"));
     this->domain = url.substr(url.find("://") + 3);
     this->domain = this->domain.substr(0, this->domain.find("/"));
+    if (this->domain.find(":") == std::string::npos) {
+        this->SetPort(this->protocol == "https"?443:80);
+    } else {
+        this->SetPort(std::stoi(this->domain.substr(this->domain.find(":") + 1)));
+        this->domain = this->domain.substr(0, this->domain.find(":"));
+    }
     this->path = url.substr(url.find("://") + 3);
     this->path = this->path.substr(this->path.find("/"));
-    this->headers["Host"] = url;
+    this->headers["Host"] = domain + (port == 80?"":":" + std::to_string(port));
     return this;
+}
+
+Link::Request* Link::Request::SetPort(int d) {
+    this->port = d;
+    return this;
+}
+
+int Link::Request::GetPort() {
+    return port;
 }
 
 Link::Request* Link::Request::SetMethod(std::string method) {

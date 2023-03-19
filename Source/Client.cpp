@@ -19,21 +19,11 @@ Link::Client::Client(Link::Request* request) {
     if (this->request->GetProtocol() != "https" && this->request->GetProtocol() != "http") {
         std::cout << "Invalid protocol: " << this->request->GetProtocol() << std::endl;
     }
-    this->port = 0;
-}
-
-Link::Request* Link::Client::SetPort(int port) {
-    this->port = port;
-    return this->request;
 }
 
 Link::Request* Link::Client::SetRequest(Link::Request* request) {
     this->request = request;
     return this->request;
-}
-
-int Link::Client::GetPort() {
-    return this->port;
 }
 
 Link::Request* Link::Client::GetRequest() {
@@ -90,8 +80,8 @@ Link::Response* Link::Client::Send() {
     struct sockaddr_in addr;
     bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
-    if (this->port==0) addr.sin_port = htons(this->request->GetProtocol()=="https"?443:80); // TODO: Parse port from URL
-    else addr.sin_port = htons(this->port);
+    if (this->request->GetPort()==0) addr.sin_port = htons(this->request->GetProtocol()=="https"?443:80); // TODO: Parse port from URL
+    else addr.sin_port = htons(this->request->GetPort());
     struct hostent* ipv4 = gethostbyname(this->request->GetDomain().c_str());
     addr.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)ipv4->h_addr_list[0]));
     
@@ -115,7 +105,6 @@ Link::Response* Link::Client::Send() {
     }
 
     std::string request = this->request->GetMethod() + " " + this->request->GetPath() + " HTTP/1.1\r\n"; // TODO: Add HTTP version variable
-    this->request->SetHeader("Host", this->request->GetDomain());
     this->request->SetHeader("Connection", "close");
     this->request->SetHeader("Accept", "*/*");
     this->request->SetHeader("Accept-Encoding", "gzip, deflate");

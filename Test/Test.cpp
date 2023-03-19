@@ -8,7 +8,7 @@ int main(int argc, char** argv) {
         std::cout << "OpenSSL version is lower than 3.0.0" << std::endl;
         return 0;
     }
-    bool server = true;
+    bool server = false;
     bool https = false;
     if (argc > 1) {
         if (std::string(argv[1]) == "server") server = true;
@@ -30,10 +30,8 @@ int main(int argc, char** argv) {
         server.SetStartMessage("Server started on port 8080");
         server.Start();
     } else {
-        Link::Request* request = new Link::Request(https?"https://localhost/":"http://localhost/");
-        request->SetPath("/");
+        Link::Request* request = new Link::Request(https?"https://localhost:8080/":"http://localhost:8080/");
         Link::Client client(request);
-        client.SetPort(8080);
         Link::Response* response = client.Send();
         std::cout << response->GetBody() << std::endl;
     }

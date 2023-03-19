@@ -25,7 +25,8 @@ namespace Link {
                          * SetVersion(std::string version),
                          * SetHeadersRaw(std::string headersRaw),
                          * SetRawHeader(std::string key, std::string value),
-                         * SetIP(std::string ip);
+                         * SetIP(std::string ip),
+                         * SetPort(int port);
                          
             std::string GetURL(),
                         GetMethod(),
@@ -39,11 +40,14 @@ namespace Link {
                         GetDomain(),
                         GetVersion(),
                         GetIP();
+
+            int GetPort();
             
             std::string GetRawHeaders(), GetRawParams(), GetRawBody();
         private:
             std::map<std::string, std::string> headers, cookies, params;
             std::string body, protocol, path, domain, url, method, version, ip;
+            int port;
 
     };
 
@@ -76,9 +80,7 @@ namespace Link {
             Client(Request* request);
             Link::Response* Send();
 
-            Request* SetPort(int port),
-                   * SetRequest(Request* request);
-            int GetPort();
+            Request* SetRequest(Request* request);
 
             Request* GetRequest();
             Response* GetResponse();
@@ -89,7 +91,7 @@ namespace Link {
             Request* request;
             Response* response;
             SSL* ssl;
-            int port, sock;
+            int sock;
 
     };
 
