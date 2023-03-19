@@ -104,6 +104,7 @@ namespace Link {
                   * Stop(),
                   * EnableMultiThreading(),
                   * DisableMultiThreading(),
+                  * EnableDebugging(),
                   * EnableSSL(std::string certPath, std::string keyPath),
                   * Get(std::string path, std::function<void(Request*, Response*)> callback),
                   * Post(std::string path, std::function<void(Request*, Response*)> callback),
@@ -116,12 +117,12 @@ namespace Link {
             std::map<std::vector<std::string>, std::function<void(Request*, Response*)>> GetCallbacks();
             std::vector<std::string> GetStaticPages();
             std::map<int, std::function<void(Request*, Response*)>> GetErrors();
-            bool IsRunning(), IsMultiThreaded(), IsSSL();
+            bool IsRunning(), IsMultiThreaded(), IsSSL(), IsDebugging();
             std::string GetStaticPagesDirectory();
         private:
             int port, sock;
             SSL_CTX* ctx;
-            bool running, sslEnabled, multiThreaded;
+            bool running, sslEnabled, multiThreaded, debugging;
             std::string certPath, keyPath, staticPages, startMessage;
             std::map<std::vector<std::string>, std::function<void(Request*, Response*)>> callbacks;
             std::map<int, std::function<void(Request*, Response*)>> errors;

@@ -49,6 +49,9 @@ void Link::Thread::SetIP(std::string ip) {
 }
 
 void Link::Thread::Run() {
+    // calculate how long the request took
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
     char buffer[1];
     std::string request = "";
     while (Read(buffer, 1) > 0) {
@@ -164,6 +167,18 @@ void Link::Thread::Run() {
     std::string res = response->GetVersion() + " " + std::to_string(response->GetStatus()) + " " + Link::Status(response->GetStatus()) + "\r\n";
     res = response->GetHeadersRaw() + "\r\n" + response->GetBody();
     Write(res.c_str(), res.length());
+    
+    if (server->IsDebugging()) {
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        double time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000.0;
+        std::string color = "\033[0m";
+        if (response->GetStatus() >= 200 && response->GetStatus() < 300) color = "\033[32m";
+        else if (response->GetStatus() >= 300 && response->GetStatus() < 400) color = "\033[33m";
+        else if (response->GetStatus() >= 400 && response->GetStatus() < 500) color = "\033[31m";
+        else if (response->GetStatus() >= 500 && response->GetStatus() < 600) color = "\033[35m";
+        std::cout << "\033[36m[Link]" << color << " [" << req->GetMethod() << "] " << req->GetPath() << " \033[35m" << time << "ms" << "\033[0m" << std::endl;
+    }
+
     if (server->IsMultiThreaded()) pthread_exit(NULL);
 }
 

@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
         });
         server.EnableSSL("certificate.pem", "key.pem");
         server.EnableMultiThreading();
+        server.EnableDebugging();
         server.SetStartMessage("Server started on port 8080");
         server.Start();
     } else {
