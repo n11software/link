@@ -15,6 +15,7 @@
 #include <string>
 
 Link::Client::Client(Link::Request* request) {
+    Status = 0;
     this->request = request;
     if (this->request->GetProtocol() != "https" && this->request->GetProtocol() != "http") {
         std::cout << "Invalid protocol: " << this->request->GetProtocol() << std::endl;
@@ -73,6 +74,7 @@ bool Link::Client::getChunkSize(int& remaining, std::string& body) {
 }
 
 Link::Response* Link::Client::Send() {
+    Status = 0;
     SSL_CTX* ctx = NULL;
     if (this->request->GetProtocol() == "https") {
         ctx = SSL_CTX_new(SSLv23_client_method());
@@ -88,7 +90,7 @@ Link::Response* Link::Client::Send() {
     socklen_t socklen = sizeof(addr);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (connect(sock, (struct sockaddr*)&addr, socklen) < 0) std::cout << "Connection failed" << std::endl;
+    if (connect(sock, (struct sockaddr*)&addr, socklen) < 0) Status = 1;
 
     if (this->request->GetProtocol() == "https") {
         SSL_library_init();
@@ -101,7 +103,7 @@ Link::Response* Link::Client::Send() {
         SSL_set_fd(ssl, sock);
         SSL_set_tlsext_host_name(ssl, this->request->GetDomain().c_str());
         int error = SSL_connect(ssl);
-        if (error < 0) std::cout << "SSL connection failed" << std::endl;
+        if (error < 0) Status = 2;
     }
 
     std::string request = this->request->GetMethod() + " " + this->request->GetPath() + " HTTP/1.1\r\n"; // TODO: Add HTTP version variable
@@ -115,7 +117,7 @@ Link::Response* Link::Client::Send() {
     request += this->request->GetBody();
     
     int status = Write(request.c_str(), strlen(request.c_str()));
-    if (status < 0) std::cout << "Write failed: " << status << std::endl;
+    if (status < 0) Status = 3;
 
     int flags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL, flags | O_NONBLOCK);

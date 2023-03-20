@@ -84,6 +84,7 @@ namespace Link {
 
             Request* GetRequest();
             Response* GetResponse();
+            int Status;
         private:
             int Write(const void* buf, size_t count);
             int Read(void* buf, size_t count);
@@ -121,6 +122,7 @@ namespace Link {
             std::map<int, std::function<void(Request*, Response*)>> GetErrors();
             bool IsRunning(), IsMultiThreaded(), IsSSL(), IsDebugging();
             std::string GetStaticPagesDirectory();
+            int Status;
         private:
             int port, sock;
             SSL_CTX* ctx;

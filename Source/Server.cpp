@@ -18,6 +18,7 @@ Link::Server::Server() {
     this->multiThreaded = false;
     this->sslEnabled = false;
     this->debugging = false;
+    this->Status = 0;
 }
 
 Link::Server* Link::Server::EnableDebugging() {
@@ -34,6 +35,7 @@ Link::Server::Server(int port) {
     this->multiThreaded = false;
     this->sslEnabled = false;
     this->debugging = false;
+    this->Status = 0;
 }
 
 Link::Server* Link::Server::SetPort(int port) {
@@ -171,8 +173,8 @@ Link::Server* Link::Server::Start() {
     if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) return this;
 
     if (sock < 0) {
-        perror("Socket error");
-        exit(1);
+        Status = 1;
+        return this;
     }
 
     struct sockaddr_in server;
@@ -181,13 +183,13 @@ Link::Server* Link::Server::Start() {
     server.sin_port = htons(this->port);
 
     if (bind(sock, (struct sockaddr*) &server, sizeof(server)) < 0) {
-        perror("Bind error");
-        exit(1);
+        Status = 2;
+        return this;
     }
 
     if (listen(sock, 128) < 0) {
-        perror("Listen error");
-        exit(1);
+        Status = 3;
+        return this;
     }
 
     if (startMessage.length() > 0) std::cout << startMessage << std::endl;
@@ -197,8 +199,8 @@ Link::Server* Link::Server::Start() {
         socklen_t clientLen = sizeof(client);
         int clientSock = accept(sock, (struct sockaddr*) &client, &clientLen);
         if (clientSock < 0) {
-            perror("Accept error");
-            exit(1);
+            Status = 4;
+            return this;
         }
         SSL* ssl;
 
