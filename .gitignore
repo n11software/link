@@ -8,8 +8,9 @@ CMakeCache.txt
 CTestTestfile.cmake
 build.ninja
 cmake_install.cmake
-liblink.so
-liblink.dylib
 linktest
 install_manifest.txt
 *.csr
+
+*.dylib
+*.so

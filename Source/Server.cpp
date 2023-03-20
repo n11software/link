@@ -15,7 +15,7 @@
 
 Link::Server::Server() {
     this->port = 0;
-    this->multiThreaded = true;
+    this->multiThreaded = false;
     this->sslEnabled = false;
     this->debugging = false;
 }
@@ -31,15 +31,13 @@ bool Link::Server::IsDebugging() {
 
 Link::Server::Server(int port) {
     this->port = port;
-    this->multiThreaded = true;
+    this->multiThreaded = false;
     this->sslEnabled = false;
     this->debugging = false;
 }
 
 Link::Server* Link::Server::SetPort(int port) {
     this->port = port;
-    this->multiThreaded = true;
-    this->sslEnabled = false;
     return this;
 }
 
