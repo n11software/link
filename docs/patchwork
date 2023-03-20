@@ -1,0 +1,120 @@
+
+	Patchwork with Link
+
+This document will cover everything from actually working inside
+the Link codebase to creating patches and sending them.
+
+1. FIGURING OUT WHAT TO DO
+
+	The best way to find something to work on in the source
+	is to ask around in the mailing list, or look at the TODO
+	files. You can also just adjust code to follow the coding
+	styles.
+
+2a. SETTING UP YOUR ENVIRONMENT (GIT)
+
+	Once you've found something to do, you can either work
+	via Git by cloning the official repository:
+
+		$ git clone https://github.com/n11software/link.git
+
+	and basing your work off of the last release by creating
+	a new branch and basing it off of the last release:
+
+		$ git checkout -b devel tags/v1.0.1
+
+	You can update the master branch and devel branch by:
+
+		$ git checkout master && git pull origin master
+		$ git checkout devel && git merge --no-ff master
+
+2b. SETTING UP YOUR ENVIRONMENT (TARBALLS)
+
+	Once you've found something to do, you can use tarballs
+	to do your work by grabbing the source tarballs from the
+	GitHub release.
+
+	Usually, you will end up editing multiple files (if not,
+	skip this section) so you should extract the tarball into
+	two separate folders; one for development and the other
+	as a vanilla tree so we can use it to compare against.
+
+		$ gzip -cd link-1.0.1.tar.gz | tar xvf
+		$ mv link-1.0.1 link-devel
+		$ gzip -cd link-1.0.1.tar.gz | tar xvf
+		$ mv link-1.0.1 link-vanilla
+
+	To update the folders upon a new version release, you'll
+	need to delete the old link-devel folder and get the
+	patch file from GitHub (which will be named like: 
+	patch-1.0.1) and apply it to link-vanilla like so: 
+
+		$ rm -rf link-devel
+		$ cd link-vanilla && patch -p1 -ipatch-1.0.1
+		$ cd ../ && cp -r link-vanilla/ link-devel/
+
+	If you only need to modify a single file, just do:
+		
+		$ cp $MYFILE $MYFILE.orig
+		$ vi $MYFILE
+
+3a. Making a commit (GIT)
+
+	Once you've made your changes, if you use GIT, you first
+	need to create a commit like so:
+
+		$ git add <file name or .> && git commit -s
+
+	You may need to add your name and email to your gitconfig
+
+		$ git config --global user.name "John Doe"
+		$ git config --global user.email "johnd@n11.dev"
+
+	The canonical commit name format is:
+		
+		<subsys>: <commit name>
+
+3b. Making the patch files
+
+	Once you have made your commit (GIT), or have made your 
+	changes (TARBALLS), you are able to make the patch files.
+
+	For GIT users, you can simply do:
+
+		$ git format-patch <commit ID>
+
+	where <commit ID> is the commit ID of the commit before
+	your first commit.
+
+	For people using TARBALLS, there is more steps depending
+	on your change.
+
+	If you have only edited a single file and created the
+	.orig copy, you can just do:
+
+		$ diff -up $MYFILE{.orig,} > patch
+
+	If you did multiple files and you have the vanilla source
+	tree, you need to do:
+
+		$ diff -uprN link-vanilla link-devel > link-devel/patch
+
+3c. Editing the patch files (TARBALLS)
+
+	When using TARBALLS, you will have to modify your patch
+	files to work correctly with the patch format that git
+	uses. 
+
+	To edit it correctly, all you need to add to the top of
+	your patch file is something like:
+
+		From: John Doe <johnd@n11.dev>
+		Date: Sun, 19 Mar 2023 19:51:52 -0400
+		Subject: [PATCH] <commit name>
+		
+		<commit description>
+
+		Signed-off-by: John Dode <johnd@n11.dev>
+		---
+
+		<diff here>
