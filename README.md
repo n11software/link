@@ -1,6 +1,19 @@
 # Link
 Link is a web server library for C++ built with a focus of speed.
 
+## Getting Link
+You can find the Link repository at multiple places. These are all the current
+repositories.
+
+```
+    GitHub (N11): https://github.com/n11software/link.git
+                  git@github.com:n11software/link.git
+    GitHub (aristonl): https://github.com/aristonl/link.git
+                       git@github.com:aristonl/link.git
+    repo.or.cz (aristonl): git://repo.or.cz/link.git
+                           https://repo.or.cz/link.git
+```
+
 ## Build and Install Link
 Make sure you install CMake, GCC, Ninja, zlib, and OpenSSL version >=3.
 
