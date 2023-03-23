@@ -1,0 +1,36 @@
+Link v2.0 Release Notes
+=======================
+
+Changes since v1.0.1
+--------------------
+
+All changes listed are in chronological order.
+
+ * macOS build support.
+
+ * Fixed chunk encoding.
+
+ * Added compression support via zlib (new dependency).
+
+ * COPYRIGHT file is added, using BSD 3-Clause.
+
+ * Added decodeHTTP().
+
+ * Added a query parser.
+
+ * Server now recursively serves static pages.
+
+ * Added a cookie parser.
+
+ * Added Request::SetIP() and Request::GetIP().
+
+ * New security policy.
+
+ * Multithreading is fixed.
+
+ * HTTPS support is fixed. macOS usually uses either LibreSSL or OpenSSL
+   version 1.1. This caused some issues when testing so make sure to use the
+   latest version of OpenSSL (i.e. 3 and above).
+
+ * Server debugging is added.
+
