@@ -53,6 +53,15 @@ Link::Server* Link::Server::Stop() {
     return this;
 }
 
+Link::Server* Link::Server::Use(std::function<void(Link::Request*, Link::Response*, Link::Server*)> middleware) {
+    this->middlewares.push_back(middleware);
+    return this;
+}
+
+std::vector<std::function<void(Link::Request*, Link::Response*, Link::Server*)>> Link::Server::GetMiddlewares() {
+    return this->middlewares;
+}
+
 Link::Server* Link::Server::DisableMultiThreading() {
     this->multiThreaded = false;
     return this;
@@ -258,14 +267,6 @@ Link::Server* Link::Server::Start() {
                 thread.Run();
             }
         }
-
-        if (sslEnabled&&ClientSSL) {
-            SSL_clear(ssl);
-            SSL_shutdown(ssl);
-            SSL_free(ssl);
-            ClientSSL = false;
-        }
-        close(clientSock);
     }
 
     shutdown(sock, SHUT_RDWR);

@@ -41,6 +41,8 @@ namespace Link {
                         GetVersion(),
                         GetIP();
 
+            std::map<std::string, std::string> GetParams();
+
             int GetPort();
             
             std::string GetRawHeaders(), GetRawParams(), GetRawBody();
@@ -60,17 +62,23 @@ namespace Link {
             Response* SetHeader(std::string key, std::string value),
                     * SetBody(std::string body),
                     * SetHeadersRaw(std::string headersRaw),
+                    * SetRawHeader(std::string key, std::string value),
                     * SetStatus(int status),
-                    * SetVersion(std::string version);
+                    * SetVersion(std::string version),
+                    * Close(),
+                    * SetInstanceType(std::string type);
 
             std::string GetHeader(std::string key),
                         GetBody(),
                         GetHeadersRaw(),
                         GetVersion();
             int GetStatus();
+            bool isClosed();
+            bool InstanceOf(std::string type);
         private:
             std::map<std::string, std::string> headers;
-            std::string body, headersRaw, version;
+            std::string body, headersRaw, version, instanceType;
+            bool closed;
             int status;
     };
 
@@ -114,10 +122,12 @@ namespace Link {
                   * Route(std::string method, std::string path, std::function<void(Request*, Response*)> callback),
                   * Error(int status, std::function<void(Request*, Response*)> callback),
                   * SetStaticPages(std::string path),
-                  * SetStartMessage(std::string message);
+                  * SetStartMessage(std::string message),
+                  * Use(std::function<void(Request*, Response*, Server*)> middleware);
 
             int GetPort();
             std::map<std::vector<std::string>, std::function<void(Request*, Response*)>> GetCallbacks();
+            std::vector<std::function<void(Request*, Response*, Server*)>> GetMiddlewares();
             std::vector<std::string> GetStaticPages();
             std::map<int, std::function<void(Request*, Response*)>> GetErrors();
             bool IsRunning(), IsMultiThreaded(), IsSSL(), IsDebugging();
@@ -129,6 +139,7 @@ namespace Link {
             bool running, sslEnabled, multiThreaded, debugging;
             std::string certPath, keyPath, staticPages, startMessage;
             std::map<std::vector<std::string>, std::function<void(Request*, Response*)>> callbacks;
+            std::vector<std::function<void(Request*, Response*, Server*)>> middlewares;
             std::map<int, std::function<void(Request*, Response*)>> errors;
     };
 
@@ -147,6 +158,30 @@ namespace Link {
             bool sslEnabled;
             int sock;
             std::string ip;
+    };
+
+    class Target {
+        public:
+            Target(std::string host, std::string target);
+            Target* AddHost(std::string host);
+            std::vector<std::string> GetHosts();
+            std::string GetTarget();
+            bool Redirects();
+        private:
+            std::vector<std::string> hosts;
+            std::string target;
+    };
+
+    class Proxy {
+        public:
+            Proxy();
+            Proxy(std::vector<Target*> targets);
+            Proxy* AddTarget(Target* target), *Start(), *EnableHTTPRedirects();
+            std::vector<Target*> GetTargets();
+            bool Redirects();
+        private:
+            std::vector<Target*> targets;
+            bool redirects;
     };
 
     std::string Status(int status);

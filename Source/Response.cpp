@@ -5,10 +5,33 @@
 
 Link::Response::Response() {
     this->SetHeadersRaw("HTTP/1.1 200 OK\r\n")->SetBody("");
+    this->SetInstanceType("Server");
+    this->closed = false;
 }
 
 Link::Response::Response(std::string header, std::string body) {
-    this->SetHeadersRaw(header)->SetBody(body);
+    this->SetHeadersRaw(header);
+    this->SetBody(body);
+    this->SetInstanceType("Client");
+    this->closed = false;
+}
+
+Link::Response* Link::Response::SetInstanceType(std::string type) {
+    this->instanceType = type;
+    return this;
+}
+
+bool Link::Response::InstanceOf(std::string type) {
+    return this->instanceType == type;
+}
+
+Link::Response* Link::Response::Close() {
+    this->closed = true;
+    return this;
+}
+
+bool Link::Response::isClosed() {
+    return this->closed;
 }
 
 Link::Response* Link::Response::SetHeader(std::string key, std::string value) {
@@ -63,6 +86,12 @@ std::string deflate(std::string data) {
 
 Link::Response* Link::Response::SetBody(std::string body) {
     this->SetHeader("Content-Length", std::to_string(body.size()));
+    this->SetHeader("Transfer-Encoding", "");
+    this->body = body;
+    if (this->InstanceOf("Server")) {
+        this->SetHeader("Content-Encoding", "");
+        return this;
+    }
     if (this->GetHeader("Content-Encoding") == "gzip") {
         this->body = decompress(body);
         return this;
@@ -71,7 +100,11 @@ Link::Response* Link::Response::SetBody(std::string body) {
         this->body = deflate(body);
         return this;
     }
-    this->body = body;
+    return this;
+}
+
+Link::Response* Link::Response::SetRawHeader(std::string key, std::string value) {
+    this->headers[key] = value;
     return this;
 }
 
@@ -80,7 +113,7 @@ Link::Response* Link::Response::SetHeadersRaw(std::string headersRaw) {
     std::string line = headersRaw.substr(0, headersRaw.find("\r\n"));
     this->version = line.substr(0, line.find(" "));
     line = line.substr(line.find(" ") + 1);
-    this->status = std::stoi(line.substr(0, line.find(" ")));
+    this->status = std::stoi(line);
     
     std::istringstream iss(headersRaw.substr(headersRaw.find("\r\n") + 2));
     std::string l;
@@ -91,7 +124,6 @@ Link::Response* Link::Response::SetHeadersRaw(std::string headersRaw) {
         value = value.substr(0, value.find("\r"));
         this->SetHeader(key, value);
     }
-    
     return this;
 }
 

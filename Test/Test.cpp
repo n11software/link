@@ -7,8 +7,10 @@
 bool ready = false;
 bool ssl = false;
 
+Link::Server server(8080);
+
 void* client(void* arg) {
-    while (!ready) std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    while (!ready || !server.IsRunning()) std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     Link::Request* req = new Link::Request(std::string(ssl?"https":"http") + "://localhost:8080/");
     Link::Client client(req);
     Link::Response* res = client.Send();
@@ -20,7 +22,6 @@ void* client(void* arg) {
     return nullptr;
 }
 
-Link::Server server(8080);
 int main(int argc, char** argv) {
     if (SSLeay() < 0x30000000L) {
         std::cout << "OpenSSL version is lower than 3.0.0" << std::endl;
@@ -33,7 +34,7 @@ int main(int argc, char** argv) {
     t.detach();
 
     server.Get("/", [](Link::Request* req, Link::Response* res) {
-        res->SetBody("(SSL: " + std::string(ssl?"true":"false") + " | Multi-threaded: " + std::string(server.IsMultiThreaded()?"true":"false") + ")");
+        res->SetBody("(SSL: " + std::string(ssl?"true":"false") + " | Multi-Threaded: " + std::string(server.IsMultiThreaded()?"true":"false") + ")");
         server.Stop();
     });
 
@@ -59,6 +60,7 @@ int main(int argc, char** argv) {
     server.EnableSSL("certificate.pem", "key.pem");
     t = std::thread(client, nullptr);
     t.detach();
+    std::cout << "TEST" << std::endl;
     server.Start();
     if (server.Status != 0) {
         std::cout << "\033[1;31mTest failed" << std::endl;
@@ -66,6 +68,7 @@ int main(int argc, char** argv) {
     }
 
     // 4/4
+    std::cout << "TEST" << std::endl;
     server.DisableMultiThreading();
     t = std::thread(client, nullptr);
     t.detach();

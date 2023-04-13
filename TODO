@@ -18,3 +18,8 @@ __pthread_kill_implementation (threadid=<optimized out>, signo=signo@entry=6,
 Downloading source file /usr/src/debug/glibc-2.36-9.fc37.x86_64/nptl/pthread_kill.c
 44            return INTERNAL_SYSCALL_ERROR_P (ret) ? INTERNAL_SYSCALL_ERRNO (ret) : 0;
 
+
+  - This is related to removing pthread_join, I attempted this myself and fixed
+  the string issue, it still does not run correctly and will need to be fixed
+  in a later commit.
+      - Levi Hicks @ N11

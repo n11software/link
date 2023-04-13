@@ -37,12 +37,12 @@ Link::Response* Link::Client::GetResponse() {
 
 int Link::Client::Write(const void* buf, size_t count) {
     if (this->request->GetProtocol() == "https") return SSL_write((SSL*)ssl, buf, count);
-    else return write(sock, buf, count);
+    else return send(sock, buf, count, 0);
 }
 
 int Link::Client::Read(void* buf, size_t count) {
     if (this->request->GetProtocol() == "https") return SSL_read((SSL*)ssl, buf, count);
-    else return read(sock, buf, count);
+    else return recv(sock, buf, count, 0);
 }
 
 bool Link::Client::getChunkSize(int& remaining, std::string& body) {
@@ -90,7 +90,10 @@ Link::Response* Link::Client::Send() {
     socklen_t socklen = sizeof(addr);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (connect(sock, (struct sockaddr*)&addr, socklen) < 0) Status = 1;
+    if (connect(sock, (struct sockaddr*)&addr, socklen) < 0) {
+        Status = 1;
+        return NULL;
+    }
 
     if (this->request->GetProtocol() == "https") {
         SSL_library_init();
@@ -103,21 +106,21 @@ Link::Response* Link::Client::Send() {
         SSL_set_fd(ssl, sock);
         SSL_set_tlsext_host_name(ssl, this->request->GetDomain().c_str());
         int error = SSL_connect(ssl);
-        if (error < 0) Status = 2;
+        if (error < 0) {
+            Status = 2;
+            return NULL;
+        }
     }
 
-    std::string request = this->request->GetMethod() + " " + this->request->GetPath() + " HTTP/1.1\r\n"; // TODO: Add HTTP version variable
-    this->request->SetHeader("Connection", "close");
-    this->request->SetHeader("Accept", "*/*");
-    this->request->SetHeader("Accept-Encoding", "gzip, deflate");
-    this->request->SetHeader("Accept-Language", "en-US,en;q=0.9");
-    this->request->SetHeader("User-Agent", "Link/2.0.0");
-    request += this->request->GetRawHeaders();
-    request += "\r\n";
-    request += this->request->GetBody();
+    std::string r = this->request->GetRawHeaders();
+    r += "\r\n";
+    r += this->request->GetBody();
     
-    int status = Write(request.c_str(), strlen(request.c_str()));
-    if (status < 0) Status = 3;
+    int status = Write(r.c_str(), strlen(r.c_str()));
+    if (status < 0) {
+        Status = 3;
+        return NULL;
+    }
 
     int flags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL, flags | O_NONBLOCK);
@@ -135,6 +138,7 @@ Link::Response* Link::Client::Send() {
 
     std::string lower = response;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
 
     if (lower.find("transfer-encoding: chunked") != std::string::npos) {
         /*
@@ -173,7 +177,7 @@ Link::Response* Link::Client::Send() {
                 }
             }
         }
-    } else {
+    } else if (lower.find("content-length: ") != std::string::npos) {
         remaining = std::stoi(lower.substr(lower.find("content-length: ") + 16, lower.find("\r\n", lower.find("content-length: ") + 16) - lower.find("content-length: ") - 16));
         remaining-=response.substr(response.find("\r\n\r\n") + 4).length();
         if (remaining > 0) {
@@ -187,7 +191,7 @@ Link::Response* Link::Client::Send() {
         }
         body = response.substr(response.find("\r\n\r\n") + 4);
         headers = response.substr(0, response.find("\r\n\r\n"));
-    }
+    } else headers = response;
     Response* res = new Response(headers, body);
 
     if (this->request->GetProtocol() == "https") {

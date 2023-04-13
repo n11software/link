@@ -3,7 +3,24 @@
 #include <sstream>
 
 Link::Request::Request(std::string headers, std::string body) {
+    std::string line;
+    std::stringstream stream(headers);
+    std::map<std::string, std::string> headerMap;
+    int i = 0;
+    std::string path;
+    while (std::getline(stream, line)) {
+        if (i == 0) {
+            path = line.substr(line.find(" ") + 1);
+            path = path.substr(0, path.find(" "));
+        } else {
+            std::string val = line.substr(line.find(": ") + 2);
+            headerMap[line.substr(0, line.find(": "))] = val.substr(0, val.length()-1);
+        }
+        i++;
+    }
+    this->SetURL("http://"+headerMap["Host"]+path);
     this->SetHeadersRaw(headers)->SetBody(body);
+    this->SetRawHeader("Host", headerMap["Host"]);
 }
 
 std::string decodeHTTP(std::string &src) {
@@ -31,6 +48,10 @@ std::string decodeHTTP(std::string &src) {
     return (ret);
 }
 
+std::map<std::string, std::string> Link::Request::GetParams() {
+    return this->params;
+}
+
 Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
     std::string line;
     std::stringstream stream(headersRaw);
@@ -42,11 +63,10 @@ Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
             std::string path = line.substr(line.find(" ") + 1);
             this->SetPath(path.substr(0, path.find(" ")));
         } else {
-            this->SetHeader(line.substr(0, line.find(": ")), line.substr(line.find(": ") + 2));
+            this->SetRawHeader(line.substr(0, line.find(": ")), line.substr(line.find(": ") + 2, line.find("\r")));
         }
         i++;
     }
-    if (this->GetHeader("Host") != "") this->SetURL(this->GetHeader("Host") + this->path);
     if (this->path.find("?") != std::string::npos) {
         std::string queries = this->path.substr(this->path.find("?") + 1);
         std::stringstream stream(queries);
@@ -71,6 +91,7 @@ Link::Request* Link::Request::SetHeadersRaw(std::string headersRaw) {
 }
 
 Link::Request::Request(std::string url) {
+    this->version = "1.1";
     this->port = 0;
     this->SetURL(url)->SetMethod("GET");
 }
@@ -80,9 +101,9 @@ Link::Request* Link::Request::SetURL(std::string url) {
     this->protocol = url.substr(0, url.find("://"));
     this->domain = url.substr(url.find("://") + 3);
     this->domain = this->domain.substr(0, this->domain.find("/"));
-    if (this->domain.find(":") == std::string::npos) {
+    if (port == 0 && this->domain.find(":") == std::string::npos) {
         this->SetPort(this->protocol == "https"?443:80);
-    } else {
+    } else if (port == 0) {
         this->SetPort(std::stoi(this->domain.substr(this->domain.find(":") + 1)));
         this->domain = this->domain.substr(0, this->domain.find(":"));
     }
@@ -158,7 +179,7 @@ std::string Link::Request::GetDomain() {
 }
 
 std::string Link::Request::GetURL() {
-    return this->headers["Host"];
+    return this->url;
 }
 
 std::string Link::Request::GetMethod() {
@@ -193,9 +214,14 @@ std::string Link::Request::GetBody() {
 }
 
 std::string Link::Request::GetRawHeaders() {
-    std::string res = "";
-    for (auto it = this->headers.begin(); it != this->headers.end(); it++) res += it->first + ": " + it->second + "\r\n";
-    return res;
+    std::string headers = this->GetMethod() + " " + this->GetURL()
+                .substr(this->GetURL().find(this->domain)+this->domain.length() + 
+                (this->port == 80 || this->port == 443?0:std::to_string(this->port).length() + 1))
+                + " HTTP/" + this->GetVersion() + "\r\n";
+    for (auto const& x : this->headers) {
+        if (x.second != "") headers += x.first + ": " + x.second + "\r\n";
+    }
+    return headers;
 }
 
 std::string Link::Request::GetRawParams() {

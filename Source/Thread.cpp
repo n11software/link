@@ -5,18 +5,34 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <openssl/ssl.h>
+#include <iomanip>
 #include <unistd.h>
 #include <fcntl.h>
 #include <fstream>
 
 int Link::Thread::Write(const void* buf, size_t count) {
     if (this->sslEnabled) return SSL_write((SSL*)ssl, buf, count);
-    else return write(sock, buf, count);
+    else {
+        int sent = 0;
+        while (sent < count) {
+            int toSend = count - sent;
+            if (toSend > 1024) toSend = 1024;
+            int res = send(sock, (char*)buf + sent, toSend, MSG_NOSIGNAL);
+            if (res < 0) return res;
+            sent += res;
+        }
+        return sent;
+    }
 }
 
 int Link::Thread::Read(void* buf, size_t count) {
-    if (this->sslEnabled) return SSL_read((SSL*)ssl, buf, count);
-    else return read(sock, buf, count);
+    try {
+        if (this->sslEnabled) return SSL_read((SSL*)ssl, buf, count);
+        else return recv(sock, buf, count, 0);
+    } catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+        return -1;
+    }
 }
 
 Link::Thread::Thread(Server* server, int sock, bool sslEnabled) {
@@ -49,7 +65,6 @@ void Link::Thread::SetIP(std::string ip) {
 }
 
 void Link::Thread::Run() {
-    // calculate how long the request took
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
     char buffer[1];
@@ -69,6 +84,7 @@ void Link::Thread::Run() {
     std::string headers = request.substr(0, request.find("\r\n\r\n"));
 
     Link::Request* req = new Link::Request(headers, "");
+    req->SetProtocol(this->sslEnabled ? "https" : "http");
 
     std::string body;
     if (req->GetHeader("Content-Length") != "") {
@@ -90,19 +106,27 @@ void Link::Thread::Run() {
         res = response->GetHeadersRaw() + "\r\n" + response->GetBody();
         Write(res.c_str(), res.length());
         if (server->IsMultiThreaded()) pthread_exit(NULL);
+        else return;
     }
 
     std::vector<std::string> staticPages = server->GetStaticPages();
 
     bool found = false;
 
-    for (auto route : server->GetCallbacks()) {
+    for (auto middleware : server->GetMiddlewares()) {
+        middleware(req, response, server);
+    }
+
+    if (response->isClosed()) found = true;
+
+    if (!found) for (auto route : server->GetCallbacks()) {
         if (route.first[0] == req->GetMethod()) {
             std::string routePath = route.first[1];
             std::string reqPath = req->GetPath();
             if (routePath == reqPath) {
                 found = true;
                 route.second(req, response);
+                if (response->isClosed()) found = true;
                 break;
             }
             std::vector<std::string> routePathSplit = split(routePath, "/");
@@ -123,6 +147,7 @@ void Link::Thread::Run() {
                     found = true;
                     try {
                         route.second(req, response);
+                        if (response->isClosed()) found = true;
                     } catch (std::exception e) {
                         perror("Link: Error while executing route!");
                     }
@@ -166,17 +191,36 @@ void Link::Thread::Run() {
 
     std::string res = response->GetVersion() + " " + std::to_string(response->GetStatus()) + " " + Link::Status(response->GetStatus()) + "\r\n";
     res = response->GetHeadersRaw() + "\r\n" + response->GetBody();
+
+    std::cout << "DBG: " << response->GetBody() << std::endl;
+
     if (server->IsDebugging()) {
         clock_gettime(CLOCK_MONOTONIC, &end);
-        double time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000.0;
+        double time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
         std::string color = "\033[0m";
         if (response->GetStatus() >= 200 && response->GetStatus() < 300) color = "\033[32m";
         else if (response->GetStatus() >= 300 && response->GetStatus() < 400) color = "\033[33m";
         else if (response->GetStatus() >= 400 && response->GetStatus() < 500) color = "\033[31m";
         else if (response->GetStatus() >= 500 && response->GetStatus() < 600) color = "\033[35m";
-        std::cout << "\033[36m[Link]" << color << " [" << req->GetMethod() << "] " << req->GetPath() << " \033[35m" << time << "ms" << "\033[0m" << std::endl;
+        std::cout << "\033[36m[Link]" << color << " [" << req->GetMethod() << "] " << req->GetPath() << " \033[35m" << std::setprecision(2) << time << "s" << "\033[0m" << std::endl;
     }
-    Write(res.c_str(), res.length());
+
+    int error = 0;
+    socklen_t len = sizeof(error);
+    int retval = getsockopt(this->sock, SOL_SOCKET, SO_ERROR, &error, &len);
+
+    if (error != 0) {
+        this->server->Status = 5;
+    } else {
+        int ret = Write(res.c_str(), res.length());
+    }
+
+    if (this->sslEnabled) {
+        SSL_clear(ssl);
+        SSL_shutdown(ssl);
+        SSL_free(ssl);
+    }
+    close(sock);
 
     if (server->IsMultiThreaded()) pthread_exit(NULL);
 }
