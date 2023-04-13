@@ -192,8 +192,6 @@ void Link::Thread::Run() {
     std::string res = response->GetVersion() + " " + std::to_string(response->GetStatus()) + " " + Link::Status(response->GetStatus()) + "\r\n";
     res = response->GetHeadersRaw() + "\r\n" + response->GetBody();
 
-    std::cout << "DBG: " << response->GetBody() << std::endl;
-
     if (server->IsDebugging()) {
         clock_gettime(CLOCK_MONOTONIC, &end);
         double time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
