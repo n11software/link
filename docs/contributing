@@ -12,7 +12,7 @@ smaller project than Inferno.
 
 1. MAKE SEPARATE COMMITS FOR LOGICALLY SEPARATE CHANGES.
 
-	A good way to test this is to always write desciptions in
+	A good way to test this is to always write descriptions in
 	your commits about the technical details (this helps the
 	maintainers anyways).
 
@@ -29,7 +29,7 @@ smaller project than Inferno.
 
 	The "Signed-off-by" line sits at the end of a commit
 	message of the patch which certifies that you have wrote
-	the patch. 
+	the patch.
 
 	To do this, you can just add a line at the end of your
 	commit saying:
@@ -45,7 +45,7 @@ smaller project than Inferno.
 3. CODING STYLE
 
 	The coding style is same across all N11 projects (except
-	projects mainly led soley by Ariston Lorenzo). A copy of
+	projects mainly led solely by Ariston Lorenzo). A copy of
 	the coding style can be found in the source tree of
 	Hydra/Inferno.
 
@@ -54,7 +54,7 @@ smaller project than Inferno.
 	Although nowadays, people are more accustomed to the
 	world of GitHub pull requests, etc., we prefer to use
 	patches via email as with other N11 projects. PRs won't
-	be able to scale well with our codebases. 
+	be able to scale well with our codebases.
 
 	For info on actually working on Link and dealing with
 	patches, see docs/patchwork
