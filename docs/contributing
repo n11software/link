@@ -58,3 +58,7 @@ smaller project than Inferno.
 
 	For info on actually working on Link and dealing with
 	patches, see docs/patchwork
+
+	Obviously, since most people aren't accustomed to this,
+	feel free to use pull requests. But if possible, please
+	use patches :^).
