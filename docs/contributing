@@ -1,0 +1,64 @@
+
+		Contributing to Link
+			or
+	How to not make Levi or Ariston go *insane*
+
+=================================================================
+
+This is just a simple little CONTRIBUTING document for Link.
+There isn't any need for this document to be fully detailed and
+all that since we're more relaxed here since Link is a way
+smaller project than Inferno.
+
+1. MAKE SEPARATE COMMITS FOR LOGICALLY SEPARATE CHANGES.
+
+	A good way to test this is to always write descriptions in
+	your commits about the technical details (this helps the
+	maintainers anyways).
+
+	If your description starts to get long, it should serve
+	as a clear sign that probably should be splitting up
+	your patch into smaller patches.
+
+2. SIGN YOUR WORK
+
+	We're borrowing using "Signed-off-by" from Linux which
+	helps track who exactly did what and who approved a
+	change. Although Link is a smaller project, it's just
+	general good discipline to follow this.
+
+	The "Signed-off-by" line sits at the end of a commit
+	message of the patch which certifies that you have wrote
+	the patch.
+
+	To do this, you can just add a line at the end of your
+	commit saying:
+
+		Signed-off-by: John Doe <johnd@n11.dev>
+
+	using a known identity (we prefer no anonymous
+	contributions). This also can be automatically done for
+	you if you use Git by running:
+
+		$ git commit -s
+
+3. CODING STYLE
+
+	The coding style is same across all N11 projects (except
+	projects mainly led solely by Ariston Lorenzo). A copy of
+	the coding style can be found in the source tree of
+	Hydra/Inferno.
+
+4. USE PATCHES
+
+	Although nowadays, people are more accustomed to the
+	world of GitHub pull requests, etc., we prefer to use
+	patches via email as with other N11 projects. PRs won't
+	be able to scale well with our codebases.
+
+	For info on actually working on Link and dealing with
+	patches, see docs/patchwork
+
+	Obviously, since most people aren't accustomed to this,
+	feel free to use pull requests. But if possible, please
+	use patches :^).
