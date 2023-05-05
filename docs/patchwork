@@ -124,7 +124,7 @@ the Link codebase to creating patches and sending them.
 	You can use 'git send-email' to send your patches to the
 	mailing list. For example:
 
-	git send-email --to=hydra-inferno@googlegroups.com patches/commit.patch
+	git send-email --to=~aristonl/link-devel@lists.sr.ht patches/commit.patch
 
 	You will have to configure your '~/.gitconfig' to work with your email
 	provider. Navigate to https://git-send-email.io for more information.

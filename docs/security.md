@@ -9,8 +9,8 @@ Reporting a Security Issue
 
 ### 1. Creating a public issue
 The first way you can report a security bug is by creating an issue on GitHub
-and explaining the details there, or you can also email the *hydra-inferno*
-mailing list at [hydra-inferno@googlegroups.com](mailto:hydra-inferno@googlegroups.com).
+and explaining the details there, or you can also email the *link-security*
+mailing list at [link-security@lists.sr.ht](mailto:~aristonl/link-security@lists.sr.ht).
 Email is highly preferred.
 
 ### 2. Disclosing the issue privately
