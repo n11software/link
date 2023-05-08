@@ -1,0 +1,43 @@
+                               -*-text-*-
+
+                            Link Installation
+                            =================
+
+To build Link, it's just the normal 'cmake .. && make' and then 'make install'. 
+Although, instead of using Make, we encourage you to use Ninja to build since it 
+yields a faster build time:
+
+	$ mkdir build && cd build
+	$ cmake -GNinja ..
+	$ ninja && ninja install
+
+By default, Link will be installed in /usr but you can easily change this just
+by adding to the initial CMake command '-DCMAKE_INSTALL_PREFIX:PATH=/usr/local'
+like so:
+
+	$ cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
+
+PREREQUISITES:
+
+1. OpenSSL 3.x
+
+	OpenSSL 3.x is needed to use Link. You can grab a tarball from:
+
+		https://github.com/openssl/openssl
+
+	Alternatively, you can install OpenSSL via your package manager of
+	choice. A quick issue to note is that certain distros (i.e. Ubuntu
+	20.10 and below) do not supply OpenSSL 3 in their repositories but
+	OpenSSL 1.1.1. 
+
+2. zlib
+
+	zlib is needed to use Link. You can grab a tarball from:
+
+		https://zlib.net/
+
+	Alternatively, you can install zlib via your package manager of
+	choice. Contrary to OpenSSL, there's no reported issues with any
+	version of zlib.
+
+Please mail ~aristonl/link-discuss@lists.sr.ht if you have any issues.

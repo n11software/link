@@ -5,37 +5,20 @@ Link is a web server library for C++ built with a focus of speed.
 You can find the Link repository at multiple places. These are all the current
 repositories.
 
-```
-    GitHub (N11): https://github.com/n11software/link.git
-                  git@github.com:n11software/link.git
-    GitHub (aristonl): https://github.com/aristonl/link.git
-                       git@github.com:aristonl/link.git
-    repo.or.cz (aristonl): git://repo.or.cz/link.git
-                           https://repo.or.cz/link.git
-```
+	GitHub (N11): https://github.com/n11software/link.git
+	GitHub (aristonl): https://github.com/aristonl/link.git
+	repo.or.cz (aristonl): git://repo.or.cz/link.git
+	Codeberg (aristonl): https://codeberg.org/atl/link.git
+	SourceHut (N11/aristonl): https://git.sr.ht/~aristonl/link.git
 
 ## Build and Install Link
-Make sure you install CMake, GCC, Ninja, zlib, and OpenSSL version >=3.
-
->   ------------------------------------------------------------------------------
->
->   **NOTE**: *Ninja is optional as you can also use Make as your build system but
->   this is untested and Ninja is known to be a much faster build system.*
->
->   ------------------------------------------------------------------------------
+Make sure you install CMake, GCC, zlib, and OpenSSL version >=3.
 
 ```
 $ mkdir build && cd build
-$ cmake -GNinja ..
-$ ninja && sudo ninja install
+$ cmake ..
+$ make && sudo make install
 ```
->   ------------------------------------------------------------------------------
->
->   **NOTE**: *By default, Link's install prefix is* `/usr/`*. You can change
->   change this by invoking something like* `cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local -GNinja ..`
->   *which changes the install prefix to* `/usr/local`*. You may change this to your needs.*
->
->   ------------------------------------------------------------------------------
 
 ## Using Link
 <!-- TODO: work on this -->
