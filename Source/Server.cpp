@@ -11,7 +11,12 @@
 #include <fcntl.h>
 #include <functional>
 #include <fstream>
+
+#ifndef FS_EXPERIMENTAL
 #include <filesystem>
+#else
+#include <experimental/filesystem>
+#endif
 
 Link::Server::Server() {
     this->port = 0;
@@ -159,13 +164,22 @@ std::string Link::Server::GetStaticPagesDirectory() {
 }
 
 std::vector<std::string> Link::Server::GetStaticPages() {
+#ifndef FS_EXPERIMENTAL
     if (this->staticPages == "" || !std::filesystem::exists(this->staticPages)) return std::vector<std::string>();
+#else
+    if (this->staticPages == "" || !std::experimental::filesystem::exists(this->staticPages)) return std::vector<std::string>();
+#endif
     std::vector<std::string> pages;
+#ifndef FS_EXPERIMENTAL
     for (std::filesystem::recursive_directory_iterator i(staticPages), end; i != end; ++i) 
-    if (!std::filesystem::is_directory(i->path())) {
-      pages.push_back(i->path().parent_path().string()+'/'+i->path().filename().string());
-    }
-    return pages;
+        if (!std::filesystem::is_directory(i->path())) {
+#else
+    for (std::experimental::filesystem::recursive_directory_iterator i(staticPages), end; i != end; ++i)
+	if(!std::experimental::filesystem::is_directory(i->path())) {
+#endif
+            pages.push_back(i->path().parent_path().string()+'/'+i->path().filename().string());
+        }
+        return pages;
 }
 
 Link::Server* Link::Server::SetStartMessage(std::string msg) {
