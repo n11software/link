@@ -34,3 +34,5 @@ All changes listed are in chronological order.
 
  * Server debugging is added.
 
+ * Fixed GCC <= 8.0 support. <filesystem> was still in experimental so call
+   <experimental/filesystem> instead for GCC 8.0 and below. (-DFS_EXPERIMENTAL)
