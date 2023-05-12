@@ -28,7 +28,7 @@ PREREQUISITES:
 	Alternatively, you can install OpenSSL via your package manager of
 	choice. A quick issue to note is that certain distros (i.e. Ubuntu
 	20.10 and below) do not supply OpenSSL 3 in their repositories but
-	OpenSSL 1.1.1. 
+	OpenSSL 1.1.1.
 
 2. zlib
 
@@ -39,5 +39,7 @@ PREREQUISITES:
 	Alternatively, you can install zlib via your package manager of
 	choice. Contrary to OpenSSL, there's no reported issues with any
 	version of zlib.
+
+3. glibc >=2.35
 
 Please mail ~aristonl/link-discuss@lists.sr.ht if you have any issues.
