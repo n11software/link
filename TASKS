@@ -23,7 +23,7 @@ to that task (i.e. accepting patches, making the final pull request).
  	According to Levi, in the proxy implementation commit, he wasn't able to
 	be able to turn it into a class so we'll put this here.
 
- * #4: Option to not build linktest
+ * #4: Option to not build linktest (atl)
 
  	You may be saying 'just do make link' but then you can't install it since
 	apparently installing the library requires linktest to be built.
@@ -32,3 +32,5 @@ to that task (i.e. accepting patches, making the final pull request).
 	having a lot of issues trying to compile linktest that I've never seen
 	before and doesn't happen when compiling manually rather than through
 	the source RPM.
+
+ * #5: Finish man pages (atl)
