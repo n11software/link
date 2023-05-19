@@ -34,6 +34,9 @@ You can email ~aristonl/link-discuss@lists.sr.ht for any user discussion and
 issue reports (excluding security vulnerabilities, see docs/security.md). All
 patches and pull requests can be sent to ~aristonl/link-devel@lists.sr.ht.
 
+## Credits
+See CREDITS.
+
 ## Contributing
 See docs/contributing
 
