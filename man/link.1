@@ -27,7 +27,7 @@
 .\"
 
 .Dd May 19, 2023
-.Dt LINK 3
+.Dt LINK 7
 .Sh NAME
 link \- A web server library for C++ built with a focus of speed.
 .Sh SYNOPSIS
@@ -38,6 +38,30 @@ link \- A web server library for C++ built with a focus of speed.
 is a web server library for C++ made with speed in mind. Link offers a manual
 experience in making a web application and the web server and linking them
 together into one program.
+
+There's two ways of serving files to the user; either through static serving
+or manually setting up responses. Serving static files or pages can be done
+with:
+.Vt server.SetStaticPages("public/");
+.Nm public/
+being the root folder of all the static files.
+
+Manually setting up each response is only required if you either need to set
+the HTTP header manually or you need to modify the HTTP link path like so:
+
+.nf
+server.Get("/", [](Link::Request* req, Link::Response* res) {
+	res->SetHeader("Content-Type", "text/html; charset=UTF-8");
+	std::ifstream file("index.html");
+	std::string content((std::istreambuf_iterator<char>(file)),
+		std::istreambuf_iterator<char>());
+	res->SetBody(content); 
+});
+.fi
+
+This serves the index.html file to http://localhost/ rather than having to
+access the website index via http://localhost/index.html. You may also want
+to see SetHeader(3) for a list of HTTP headers.
 .Sh AUTHOR
 .Tp
 Levi Hicks
@@ -47,11 +71,15 @@ Levi Hicks
 Ariston Lorenzo
 
 	Maintainer and Developer since 2023.
+
+Link is a N11 Software project.
 .Sh COPYRIGHT
 Copyright 2021, 2022, 2023 N11 Software. All rights reserved.
 
 This library is licensed under the BSD 3-Clause License. You may only use this
 library in compliance with the license. You can get a copy of the license in
 the source tree in the file COPYRIGHT.
+.Sh SEE ALSO
+SetHeader(3).
 .Sh BUGS
 linktest under certain *unknown* circumstances has issues building.
