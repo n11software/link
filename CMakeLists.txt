@@ -48,9 +48,11 @@ install(TARGETS link
 # Test
 file(GLOB_RECURSE TEST_SOURCES Test/*.cpp)
 
-add_executable(linktest ${TEST_SOURCES})
-target_link_libraries(linktest PRIVATE link)
+if (BUILD_LINKTEST)
+	add_executable(linktest ${TEST_SOURCES})
+	target_link_libraries(linktest PRIVATE link)
 
-enable_testing()
+	enable_testing()
 
-add_test(NAME test COMMAND $<TARGET_FILE:linktest>)
+	add_test(NAME test COMMAND $<TARGET_FILE:linktest>)
+endif()
