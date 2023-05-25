@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 		res->SetHeader("Content-Type", "text/html; charset=UTF-8");
 		std::ifstream file("index.html");
 		std::string content((std::istreambuf_iterator<char>(file)),
-			std::istreambuf_iterator<char());
+			std::istreambuf_iterator<char>());
 		res->SetBody(content);				
 	});
 
