@@ -24,3 +24,18 @@ to that task (i.e. accepting patches, making the final pull request).
 	be able to turn it into a class so we'll put this here.
 
  * #5: Finish man pages (atl)
+
+ * #6: Fix linktest seg fault (atl)
+
+ 	From dmesg:
+		[61973.788590] linktest[21256]: segfault at 9f0 ip 00007fd185d3d4ed
+		sp 00007ffd8e5c90b0 error 4 in libssl.so.3.0.8[7fd185d23000+5d000]
+		likely on CPU 7 (core 3, socket 0)
+
+		[61973.788605] Code: 0a 00 00 e9 28 ff ff ff 48 63 87 60 0c 00 00 44
+		89 a7 60 0c 00 00 e9 15 ff ff ff 48 63 87 60 0c 00 00 e9 09 ff ff ff
+		44 89 e0 <0b> 87 f0 09 00 00 89 87 f0 09 00 00 e9 f5 fe ff ff 48 89
+		8f c8 04
+
+	Seems like a OpenSSL issue but it's unclear if it's our fault or OpenSSL's
+	fault.
