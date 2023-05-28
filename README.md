@@ -38,7 +38,7 @@ patches and pull requests can be sent to ~aristonl/link-devel@lists.sr.ht.
 See CREDITS.
 
 ## Contributing
-See docs/contributing
+See docs/hacking/contributing
 
 ## License
 Link is licensed under the BSD 3-Clause License. See COPYRIGHT for more information.
