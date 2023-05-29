@@ -1,14 +1,12 @@
-Link v2.0 Release Notes
-=======================
+                             =======================
+                             Link v2.0 Release Notes
+                             =======================
 
-Changes since v1.0.1
---------------------
-
-All changes listed are in chronological order.
+                          -----------------------------
+                            What's new in Link v2.0 ?
+                          -----------------------------
 
  * macOS build support.
-
- * Fixed chunk encoding.
 
  * Added compression support via zlib (new dependency).
 
@@ -26,15 +24,23 @@ All changes listed are in chronological order.
 
  * New security policy.
 
+ * Server debugging is added.
+
+ * Added man pages.
+
+                        -------------------------------
+                          What's fixed in Link v2.0 ?
+                        -------------------------------
+
+ * Fixed chunk encoding
+
  * Multithreading is fixed.
 
  * HTTPS support is fixed. macOS usually uses either LibreSSL or OpenSSL
-   version 1.1. This caused some issues when testing so make sure to use the
-   latest version of OpenSSL (i.e. 3 and above).
-
- * Server debugging is added.
+   version 1.1.  This caused some issues when testing so make sure to use
+   the latest version of OpenSSL (i.e. 3 and above).
 
  * Fixed GCC <= 8.0 support. <filesystem> was still in experimental so call
-   <experimental/filesystem> instead for GCC 8.0 and below. (-DFS_EXPERIMENTAL)
+   <experimental/filesystem> instead for GCC 8.0 and below.
+   (-DFS_EXPERIMENTAL)
 
- * Added man pages.
