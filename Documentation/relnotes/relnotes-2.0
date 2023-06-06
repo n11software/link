@@ -44,3 +44,10 @@
    <experimental/filesystem> instead for GCC 8.0 and below.
    (-DFS_EXPERIMENTAL)
 
+
+                  ------------------------------------------
+                   What are breaking changes in Link v2.0 ?
+                  ------------------------------------------
+
+ * The Link API has been massively changed. See docs/beginners-guide.md 
+   to see some of the changes.
