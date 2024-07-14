@@ -1,6 +1,6 @@
-                       
+
                        Link - a web server library for C++
-        Copyright (c) 2021, 2022, 2023 N11 Software. All rights reserved.
+    Copyright (c) 2021, 2022, 2023, 2024 N11 Software. All rights reserved.
 
 --------------------------------------------------------------------------------
 
@@ -8,8 +8,8 @@ WHAT'S LINK
 
         Link is a web server library for C++ built with a focus of speed.
 
-        The source to Link is mainly written by Levi Hicks with help from 
-        Ariston Lorenzo in maintainership and documentation. Link is a N11 
+        The source to Link is mainly written by Levi Hicks with help from
+        Ariston Lorenzo in maintainership and documentation. Link is a N11
         project.
 
 --------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ GETTING SOURCES:
 
 --------------------------------------------------------------------------------
 
-INSTALLING: 
+INSTALLING:
 
         Make sure you install CMake, GCC, zlib, and OpenSSL version >=3.
 
@@ -40,7 +40,7 @@ INSTALLING:
 USAGE:
 
         You can find a Link website template at aristonl/linkproj on GitHub or
-        at git.sr.ht/~aristonl/linkproj. 
+        at git.sr.ht/~aristonl/linkproj.
         See its README for more information.
 
         See docs/beginners-guide.md for more information on using Link.
@@ -49,9 +49,9 @@ USAGE:
 
 MAILING LISTS:
 
-        You can email ~aristonl/link-discuss@lists.sr.ht for any user 
-        discussion and issue reports (excluding security vulnerabilities, see 
-        docs/security.md). All patches and pull requests can be sent to 
+        You can email ~aristonl/link-discuss@lists.sr.ht for any user
+        discussion and issue reports (excluding security vulnerabilities, see
+        docs/security.md). All patches and pull requests can be sent to
         ~aristonl/link-devel@lists.sr.ht.
 
 --------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ CREDITS:
 
 --------------------------------------------------------------------------------
 
-Copyright (c) 2021, 2022, 2023 N11 Software. All rights reserved.
+Copyright (c) 2021, 2022, 2023, 2024 N11 Software. All rights reserved.
 
 This software is open source software; you can modify it and/or distribute it
 under the terms of the BSD 3-Clause License (Modified BSD License) as published
