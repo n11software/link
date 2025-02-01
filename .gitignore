@@ -1,0 +1,11 @@
+build/
+.vscode/
+*.crt
+*.pem
+*.key
+Link
+Link.exe
+run/
+!test/
+test/*
+!test/*.cpp
