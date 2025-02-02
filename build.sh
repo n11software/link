@@ -16,8 +16,10 @@ case "$1" in
         ;;
     "install")
         echo -e "${YELLOW}Installing library...${NC}"
-        sudo cp build/lib/liblink.so /usr/local/lib/
+        sudo install build/lib/liblink.so /usr/local/lib/
         sudo ldconfig
+	sudo install -d /usr/local/include/link/
+	sudo install Include/*.hpp /usr/local/include/link/
         echo -e "${GREEN}Library installed successfully!${NC}"
         exit 0
         ;;
