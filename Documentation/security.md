@@ -14,7 +14,7 @@ mailing list at [link-security@lists.sr.ht](mailto:~aristonl/link-security@lists
 Email is highly preferred.
 
 ### 2. Disclosing the issue privately
-You can also report a security issue privately via emailing [Levi Hicks](mailto:me@levicowan.dev)
+You can also report a security issue privately via emailing [Levi Hicks](mailto:levih@n11.dev)
 or direct messaging Levi on Discord (FiRe#9047). Email is preferred if no Discord
 servers are shared.
 
