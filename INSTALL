@@ -3,19 +3,19 @@
                             Link Installation
                             =================
 
-To build Link, it's just the normal 'cmake .. && make' and then 'make install'. 
-Although, instead of using Make, we encourage you to use Ninja to build since it 
-yields a faster build time:
+To build the library, you can simply use the build.sh script like so:
 
-	$ mkdir build && cd build
-	$ cmake -GNinja ..
-	$ ninja && ninja install
+	$ ./build.sh
 
-By default, Link will be installed in /usr but you can easily change this just
-by adding to the initial CMake command '-DCMAKE_INSTALL_PREFIX:PATH=/usr/local'
-like so:
+To install:
 
-	$ cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
+	$ ./build.sh install # installs to /usr/local
+
+To run tests:
+
+	$ ./build.sh test # test everything
+	$ ./build.sh test server # test *only* the server
+	$ ./build.sh test client # test *only* the client
 
 PREREQUISITES:
 
@@ -41,5 +41,23 @@ PREREQUISITES:
 	version of zlib.
 
 3. glibc >=2.35
+
+4. brotli
+
+	brotli is needed to use Link. You can grab a tarball from:
+
+		https://github.com/google/brotli/
+
+	Alternatively, you can install brotli via your package manager of
+	choice. brotli is known to work on 1.1.0.
+
+5. gzip
+
+	gzip is needed to use Link. You can grab a tarball from:
+
+		https://gnu.org/software/gzip/
+
+	Alternatively, you can install gzip via your package manager of
+	choice. gzip is known to work on 1.13.
 
 Please mail ~aristonl/link-discuss@lists.sr.ht if you have any issues.
