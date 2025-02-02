@@ -180,17 +180,20 @@ void Response::parseRawResponse(const std::string& raw) {
 std::string Response::serialize() const {
     std::string response = "HTTP/1.1 " + std::to_string(statusCode) + " " + getReasonPhrase(statusCode) + "\r\n";
     
-    // Create a temporary map with all headers
-    std::map<std::string, std::string> temp_headers = headers;
+    // Add regular headers
+    for (const auto& header : headers) {
+        response += header.first + ": " + header.second + "\r\n";
+    }
+    
+    // Add cookie headers - use generateSetCookieHeader instead of generateCookieHeader
+    std::string cookieHeaders = cookieManager.generateSetCookieHeader();
+    if (!cookieHeaders.empty()) {
+        response += cookieHeaders + "\r\n";
+    }
     
     // Add Content-Length if body is not empty
     if (!body.empty()) {
-        temp_headers["Content-Length"] = std::to_string(body.length());
-    }
-
-    // Add headers
-    for (const auto& header : temp_headers) {
-        response += header.first + ": " + header.second + "\r\n";
+        response += "Content-Length: " + std::to_string(body.length()) + "\r\n";
     }
     
     response += "\r\n" + body;

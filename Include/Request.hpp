@@ -2,6 +2,7 @@
 #include <iostream>
 #include <map>
 #include "URL.hpp"
+#include "CookieManager.hpp"
 
 namespace Link {
 
@@ -14,7 +15,9 @@ class Request {
         std::string getHeader(const std::string& key) const;
         std::string getBody() const;
         std::string getIP() const;
-        std::string getCookie(const std::string& key) const;
+        std::string getCookie(const std::string& key) const { return cookieManager.getCookie(key); }
+        bool hasCookie(const std::string& key) const { return cookieManager.hasCookie(key); }
+        const CookieManager& getCookieManager() const { return cookieManager; }
         std::string getParam(const std::string& key) const;
         void setParam(const std::string& key, const std::string& value); // Internal use
         std::string getHeadersRaw() const {
@@ -29,10 +32,10 @@ class Request {
         std::string url;
         std::string version;
         std::map<std::string, std::string> headers;
-        std::map<std::string, std::string> cookies;
         std::string body;
         std::string ip;
         std::map<std::string, std::string> params; // Add path parameters
+        CookieManager cookieManager;
         friend class Server; // Allow Server to set params
 };
 } // namespace Link

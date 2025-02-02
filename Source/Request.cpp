@@ -55,24 +55,10 @@ Request::Request(const std::string& request, std::string ip, std::string protoco
         }
     }
 
-    // Parse cookies
+    // Parse cookies using CookieManager
     auto it = headers.find("Cookie");
     if (it != headers.end()) {
-        std::istringstream cookie_line(it->second);
-        std::string line, cookie_key, cookie_value;
-        while (std::getline(cookie_line, line, ';')) {
-            std::istringstream cookie_pair(line);
-            std::getline(cookie_pair, cookie_key, '=');
-            std::getline(cookie_pair, cookie_value);
-            
-            // Trim whitespace
-            cookie_key.erase(0, cookie_key.find_first_not_of(' '));
-            cookie_key.erase(cookie_key.find_last_not_of(' ') + 1);
-            cookie_value.erase(0, cookie_value.find_first_not_of(' '));
-            cookie_value.erase(cookie_value.find_last_not_of(' ') + 1);
-            
-            cookies[cookie_key] = cookie_value;
-        }
+        cookieManager.parseCookieString(it->second);
     }
 
     // add body
@@ -90,14 +76,6 @@ std::string Request::getVersion() const {
 std::string Request::getHeader(const std::string& key) const {
     auto it = headers.find(key);
     if (it != headers.end()) {
-        return it->second;
-    }
-    return "";
-}
-
-std::string Request::getCookie(const std::string& key) const {
-    auto it = cookies.find(key);
-    if (it != cookies.end()) {
         return it->second;
     }
     return "";

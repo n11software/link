@@ -82,7 +82,14 @@
         "stop_token": "cpp",
         "__verbose_abort": "cpp",
         "filesystem": "cpp",
-        "t": "cpp"
+        "t": "cpp",
+        "csignal": "cpp",
+        "queue": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "regex": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

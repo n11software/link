@@ -36,6 +36,16 @@ int main() {
             res.sendFile("test/test.html");
         });
 
+        server.Get("/cookie", [](const Link::Request& req, Link::Response& res) {
+            // Read existing cookie if any
+            std::string existingCookie = req.getCookie("testCookie");
+            
+            // Set new cookie with explicit parameters in correct order
+            res.setCookie("testCookie", "hello cookie", "/", 3600, true, true);
+            
+            res.send("Cookie value: " + (existingCookie.empty() ? "not set" : existingCookie));
+        });
+
         // Custom 404 handler
         server.OnError(404, [](const Link::Request& req, Link::Response& res, int code) {
             res.status(code);

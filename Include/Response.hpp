@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include "CookieManager.hpp"
 
 namespace Link {
 
@@ -30,6 +31,17 @@ public:
     std::string retrieveCache(std::string filename);
     int getStatusCode() const { return statusCode; }
 
+    void setCookie(const std::string& name, const std::string& value, 
+                  const std::string& path = "/", 
+                  int maxAge = -1, 
+                  bool secure = false, 
+                  bool httpOnly = false) {
+        cookieManager.setCookie(name, value, path, maxAge, secure, httpOnly);
+    }
+    void removeCookie(const std::string& name) { cookieManager.removeCookie(name); }
+    std::string getCookie(const std::string& name) const { return cookieManager.getCookie(name); }
+    const CookieManager& getCookieManager() const { return cookieManager; }
+
 private:
     int statusCode;
     std::map<std::string, std::string> headers;
@@ -41,6 +53,7 @@ private:
     std::string decompress_bzip2(const std::string& compressed);
     std::string decompress_brotli(const std::string& compressed);
     std::map<std::string, std::string> cachedFiles;
+    CookieManager cookieManager;
 };
 
 } // namespace Link
