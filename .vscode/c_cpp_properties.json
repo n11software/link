@@ -4,7 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/Cellar/brotli/1.1.0/include"
+                "/usr/local/Cellar/brotli/1.1.0/include",
+                "/usr/local/Cellar/openssl@3/3.4.0/include"
             ],
             "defines": [],
             "macFrameworkPath": [

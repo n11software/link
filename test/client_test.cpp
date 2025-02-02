@@ -75,6 +75,7 @@ void testHttpClient() {
                   .setHeader("Accept-Encoding", "gzip, deflate, br, zstd");
                   
             auto google_response = client.Get("https://www.google.com/");
+            client.clearHeaders();
             
             // Save request, response, and final HTML
             if (google_response.isSent()) {
