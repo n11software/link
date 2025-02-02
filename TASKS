@@ -18,9 +18,11 @@ to that task (i.e. accepting patches, making the final pull request).
 	when talking about security vulnerabilities). Also, improves support for
 	the BSD's and macOS natively (since LibreSSL is the default).
 
- * #3: Finish proxy implementation (FiRe)
+ * #3: Finish proxy implementation (levih)
 
  	According to Levi, in the proxy implementation commit, he wasn't able to
 	be able to turn it into a class so we'll put this here.
 
  * #5: Finish man pages (atl)
+
+ * #6: Fix decompression with gzip only partially working (levih)
