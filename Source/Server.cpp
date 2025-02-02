@@ -256,6 +256,7 @@ struct Server::ServerImpl {
                          << Color::Yellow << " > " 
                          << metrics.format_duration(duration.count()) 
                          << Color::Reset << std::endl;
+
             }
 
         } catch (const std::exception& e) {
@@ -406,11 +407,32 @@ void Server::Listen(int port) {
 
                 // Route handling
                 bool routeFound = false;
-                for (const auto& route : impl->getRoutes) {
-                    if (route.matches(req.getURL().getPath(), req)) {
-                        route.callback(req, res);
+                
+                if (req.getMethod() == "GET") {
+                    for (const auto& route : impl->getRoutes) {
+                        if (route.matches(req.getURL().getPath(), req)) {
+                            route.callback(req, res);
+                            routeFound = true;
+                            break;
+                        }
+                    }
+                } else if (req.getMethod() == "POST") {
+                    auto it = impl->postRoutes.find(req.getURL().getPath());
+                    if (it != impl->postRoutes.end()) {
+                        it->second(req, res);
                         routeFound = true;
-                        break;
+                    }
+                } else if (req.getMethod() == "PUT") {
+                    auto it = impl->putRoutes.find(req.getURL().getPath());
+                    if (it != impl->putRoutes.end()) {
+                        it->second(req, res);
+                        routeFound = true;
+                    }
+                } else if (req.getMethod() == "DELETE") {
+                    auto it = impl->deleteRoutes.find(req.getURL().getPath());
+                    if (it != impl->deleteRoutes.end()) {
+                        it->second(req, res);
+                        routeFound = true;
                     }
                 }
 

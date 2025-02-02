@@ -9,6 +9,10 @@ int main() {
             res.send("Hello World!");
         });
 
+        server.Post("/hi", [](const Link::Request& req, Link::Response& res) {
+            res.send("Hi World!");
+        });
+
         // Match exact path
         server.Get("/users", [](const Link::Request& req, Link::Response& res) {
             res.send("Users list");

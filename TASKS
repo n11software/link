@@ -24,5 +24,3 @@ to that task (i.e. accepting patches, making the final pull request).
 	be able to turn it into a class so we'll put this here.
 
  * #5: Finish man pages (atl)
-
- * #6: Fix decompression with gzip only partially working (levih)
