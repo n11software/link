@@ -14,6 +14,7 @@
 #include <iostream>
 #include <regex>
 #include <chrono>
+#include <atomic>  // Add this for std::atomic
 
 namespace Link {
 
@@ -27,9 +28,11 @@ namespace Color {
 }
 
 struct ServerMetrics {
-    std::atomic<uint64_t> total_requests{0};
-    std::atomic<uint64_t> total_response_time{0};
+    std::atomic<uint64_t> total_requests;
+    std::atomic<uint64_t> total_response_time;
     bool enabled;
+
+    ServerMetrics() : total_requests(0), total_response_time(0), enabled(false) {}  // Initialize in constructor
 
     std::string format_duration(uint64_t microseconds) const {
         const char* color;

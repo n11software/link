@@ -2,6 +2,7 @@
 #include "Status.hpp"
 #include "Filetype.hpp"
 #include <sstream>
+#include <cstring>  // Add this for memset
 #include <zlib.h>
 #include <bzlib.h>
 #include <brotli/decode.h>
