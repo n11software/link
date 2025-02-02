@@ -1,6 +1,6 @@
 
                        Link - a web server library for C++
-    Copyright (c) 2021, 2022, 2023, 2024 N11 Software. All rights reserved.
+  Copyright (c) 2021, 2022, 2023, 2024, 2025 N11 Software. All rights reserved.
 
 --------------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ CREDITS:
 
 --------------------------------------------------------------------------------
 
-Copyright (c) 2021, 2022, 2023, 2024 N11 Software. All rights reserved.
+Copyright (c) 2021, 2022, 2023, 2024, 2025 N11 Software. All rights reserved.
 
 This software is open source software; you can modify it and/or distribute it
 under the terms of the BSD 3-Clause License (Modified BSD License) as published
