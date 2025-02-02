@@ -74,7 +74,13 @@ void testHttpClient() {
                   .setHeader("Accept-Language", "en-US,en;q=0.5")
                   .setHeader("Accept-Encoding", "gzip, deflate, br, zstd");
                   
-            auto google_response = client.Get("https://www.google.com/");
+            // auto google_response = client.Get("https://www.google.com/");
+            client.setHeader("Authorization", "Basic cm9vdDpyb290");
+            client.setHeader("Accept", "application/json");
+            client.setHeader("surreal-ns", "Development");
+            client.setHeader("surreal-db", "N11");
+            std::cout << "Sending request..." << std::endl;
+            auto google_response = client.Post("http://localhost:8000/sql", "SELECT * FROM Users");
             client.clearHeaders();
             
             // Save request, response, and final HTML

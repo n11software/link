@@ -4,13 +4,17 @@
 #include <openssl/err.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>  // Add this for TCP_NODELAY
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <stdexcept>
 #include <sstream>
+#include <fstream>  // Add this for ofstream
 #include <zlib.h>
 #include <bzlib.h>
+#include <chrono>  // Add this for timing
+#include <brotli/decode.h>
 
 namespace Link {
 
@@ -217,6 +221,10 @@ public:
             throw std::runtime_error("Failed to create socket");
         }
 
+        // Add TCP_NODELAY to disable Nagle's algorithm
+        int flag = 1;
+        setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
+
         // Set timeout
         struct timeval tv;
         tv.tv_sec = timeout;
@@ -271,198 +279,189 @@ public:
             }
         }
 
-        // Send request
+        // Send request with error checking
+        ssize_t sent;
         if (useSSL) {
-            SSL_write(ssl, lastRequest.c_str(), lastRequest.length());
+            sent = SSL_write(ssl, lastRequest.c_str(), lastRequest.length());
         } else {
-            send(sock, lastRequest.c_str(), lastRequest.length(), 0);
+            sent = send(sock, lastRequest.c_str(), lastRequest.length(), 0);
+        }
+        
+        if (sent <= 0) {
+            if (ssl) SSL_free(ssl);
+            close(sock);
+            throw std::runtime_error("Failed to send request");
         }
 
-        // Read and parse headers first
-        std::string header_block;
-        char buffer[4096];
+        std::vector<char> buffer(32768);
+        std::string response;
+        response.reserve(65536);
+        
+        // Read initial headers
         bool headers_complete = false;
-        std::map<std::string, std::string> response_headers;
-        std::string response_body;
-        bool is_chunked = false;
-        size_t content_length = 0;
-        z_stream* zs = nullptr;
-        bz_stream* bzs = nullptr;
+        size_t header_end = 0;
         
         while (!headers_complete) {
             int bytes_read = useSSL ? 
-                SSL_read(ssl, buffer, sizeof(buffer)) : 
-                recv(sock, buffer, sizeof(buffer), 0);
+                SSL_read(ssl, buffer.data(), buffer.size()) : 
+                recv(sock, buffer.data(), buffer.size(), 0);
                 
             if (bytes_read <= 0) break;
+            response.append(buffer.data(), bytes_read);
             
-            header_block.append(buffer, bytes_read);
-            size_t header_end = header_block.find("\r\n\r\n");
-            
-            if (header_end != std::string::npos) {
-                // Parse headers
-                std::string headers = header_block.substr(0, header_end);
-                response_body = header_block.substr(header_end + 4);
-                
-                std::istringstream header_stream(headers);
-                std::string line;
-                std::getline(header_stream, line); // Status line
-                while (std::getline(header_stream, line)) {
-                    if (line.empty() || line == "\r") continue;
-                    size_t colon = line.find(": ");
-                    if (colon != std::string::npos) {
-                        std::string key = line.substr(0, colon);
-                        std::string value = line.substr(colon + 2);
-                        // Remove trailing \r if present
-                        if (!value.empty() && value.back() == '\r') {
-                            value.pop_back();
-                        }
-                        response_headers[key] = value;
-                    }
-                }
-                
-                // Check transfer encoding and content length
-                auto encoding_it = response_headers.find("Transfer-Encoding");
-                is_chunked = (encoding_it != response_headers.end() && 
-                            encoding_it->second.find("chunked") != std::string::npos);
-
-                auto length_it = response_headers.find("Content-Length");
-                if (length_it != response_headers.end()) {
-                    content_length = std::stoul(length_it->second);
-                }
-
-                // Handle compression
-                auto content_encoding = response_headers.find("Content-Encoding");
-                if (content_encoding != response_headers.end()) {
-                    if (content_encoding->second == "gzip" || content_encoding->second == "deflate") {
-                        zs = new z_stream();
-                        memset(zs, 0, sizeof(z_stream));
-                        inflateInit2(zs, content_encoding->second == "gzip" ? 16 + MAX_WBITS : MAX_WBITS);
-                    } else if (content_encoding->second == "bzip2") {
-                        bzs = new bz_stream();
-                        memset(bzs, 0, sizeof(bz_stream));
-                        BZ2_bzDecompressInit(bzs, 0, 0);
-                    }
-                }
-                
+            if ((header_end = response.find("\r\n\r\n")) != std::string::npos) {
                 headers_complete = true;
             }
         }
 
-        // Read the response body
+        // Parse headers
+        std::string headers = response.substr(0, header_end);
+        std::string hdrs = headers;
+        std::transform(hdrs.begin(), hdrs.end(), hdrs.begin(), ::tolower);
+        bool is_chunked = (hdrs.find("transfer-encoding: chunked") != std::string::npos);
+        
+        // Handle chunked transfer encoding
+        std::string raw_body;
         if (is_chunked) {
-            std::string chunk_buffer = response_body;
-            size_t pos = 0;
+            std::string temp_body = response.substr(header_end + 4);
+            bool reading_chunks = true;
             
-            while (true) {
+            while (reading_chunks) {
                 // Read more data if needed
-                if (pos >= chunk_buffer.length()) {
-                    int bytes_read = useSSL ? 
-                        SSL_read(ssl, buffer, sizeof(buffer)) : 
-                        recv(sock, buffer, sizeof(buffer), 0);
-                    if (bytes_read <= 0) break;
-                    chunk_buffer.append(buffer, bytes_read);
-                }
-
-                // Process chunks
-                size_t chunk_end = chunk_buffer.find("\r\n", pos);
-                if (chunk_end == std::string::npos) continue;
-                
-                std::string chunk_size_str = chunk_buffer.substr(pos, chunk_end - pos);
-                size_t chunk_size;
-                std::istringstream(chunk_size_str) >> std::hex >> chunk_size;
-                
-                if (chunk_size == 0) break;
-                
-                pos = chunk_end + 2;
-                size_t data_end = pos + chunk_size;
-                
-                // Process chunk data
-                if (data_end <= chunk_buffer.length()) {
-                    std::string chunk_data = chunk_buffer.substr(pos, chunk_size);
-                    if (zs) {
-                        // Decompress with zlib
-                        char decomp_buffer[8192];
-                        zs->next_in = (Bytef*)chunk_data.data();
-                        zs->avail_in = chunk_data.size();
-                        do {
-                            zs->next_out = (Bytef*)decomp_buffer;
-                            zs->avail_out = sizeof(decomp_buffer);
-                            inflate(zs, Z_NO_FLUSH);
-                            response_body.append(decomp_buffer, sizeof(decomp_buffer) - zs->avail_out);
-                        } while (zs->avail_in > 0);
-                    } else if (bzs) {
-                        // Decompress with bzip2
-                        char decomp_buffer[8192];
-                        bzs->next_in = (char*)chunk_data.data();
-                        bzs->avail_in = chunk_data.size();
-                        do {
-                            bzs->next_out = decomp_buffer;
-                            bzs->avail_out = sizeof(decomp_buffer);
-                            BZ2_bzDecompress(bzs);
-                            response_body.append(decomp_buffer, sizeof(decomp_buffer) - bzs->avail_out);
-                        } while (bzs->avail_in > 0);
-                    } else {
-                        response_body += chunk_data;
+                size_t pos = 0;
+                while (true) {
+                    // Find and parse chunk size
+                    size_t chunk_header_end = temp_body.find("\r\n", pos);
+                    if (chunk_header_end == std::string::npos) {
+                        // Need more data
+                        int bytes_read = useSSL ? 
+                            SSL_read(ssl, buffer.data(), buffer.size()) : 
+                            recv(sock, buffer.data(), buffer.size(), 0);
+                        
+                        if (bytes_read <= 0) {
+                            reading_chunks = false;
+                            break;
+                        }
+                        temp_body.append(buffer.data(), bytes_read);
+                        continue;
                     }
-                    pos = data_end + 2; // Skip chunk CRLF
+
+                    // Parse chunk size
+                    std::string size_str = temp_body.substr(pos, chunk_header_end - pos);
+                    // Remove any extensions
+                    size_t semicolon = size_str.find(';');
+                    if (semicolon != std::string::npos) {
+                        size_str = size_str.substr(0, semicolon);
+                    }
+                    // Convert hex string to number
+                    size_t chunk_size;
+                    std::stringstream ss;
+                    ss << std::hex << size_str;
+                    ss >> chunk_size;
+
+                    if (chunk_size == 0) {
+                        reading_chunks = false;
+                        break;
+                    }
+
+                    // Make sure we have the full chunk
+                    size_t data_start = chunk_header_end + 2;
+                    size_t data_end = data_start + chunk_size + 2; // +2 for trailing CRLF
+                    
+                    if (temp_body.length() < data_end) {
+                        // Need more data
+                        int bytes_read = useSSL ? 
+                            SSL_read(ssl, buffer.data(), buffer.size()) : 
+                            recv(sock, buffer.data(), buffer.size(), 0);
+                        
+                        if (bytes_read <= 0) {
+                            reading_chunks = false;
+                            break;
+                        }
+                        temp_body.append(buffer.data(), bytes_read);
+                        continue;
+                    }
+
+                    // Extract chunk data (excluding trailing CRLF)
+                    raw_body.append(temp_body.substr(data_start, chunk_size));
+                    
+                    // Move to next chunk
+                    temp_body = temp_body.substr(data_end);
+                    pos = 0;
                 }
             }
-        } else if (content_length > 0) {
-            // For non-chunked responses with Content-Length
-            while (response_body.length() < content_length) {
-                int bytes_read = useSSL ? 
-                    SSL_read(ssl, buffer, sizeof(buffer)) : 
-                    recv(sock, buffer, sizeof(buffer), 0);
-                
-                if (bytes_read <= 0) break;
-                response_body.append(buffer, bytes_read);
-            }
-        } else if (!content_length) {
-            // For responses without Content-Length, read until connection closes
-            while (true) {
-                int bytes_read = useSSL ? 
-                    SSL_read(ssl, buffer, sizeof(buffer)) : 
-                    recv(sock, buffer, sizeof(buffer), 0);
-                
-                if (bytes_read <= 0) break;
-                response_body.append(buffer, bytes_read);
+        } else {
+            raw_body = response.substr(header_end + 4);
+        }
+
+        // Handle content encoding
+        std::string final_body = raw_body;
+        // headers to lower
+        size_t encoding_pos = hdrs.find("content-encoding: ");
+        if (encoding_pos != std::string::npos) {
+            size_t encoding_end = headers.find("\r\n", encoding_pos);
+            std::string encoding = headers.substr(encoding_pos + 17, encoding_end - (encoding_pos + 17));
+            // Remove all whitespace from encoding string
+            encoding.erase(std::remove_if(encoding.begin(), encoding.end(), ::isspace), encoding.end());
+            
+            if (encoding == "br") {
+                const uint8_t* next_in = reinterpret_cast<const uint8_t*>(raw_body.data());
+                size_t available_in = raw_body.size();
+                std::string output;
+                output.reserve(available_in * 4);  // Initial estimate
+
+                BrotliDecoderState* state = BrotliDecoderCreateInstance(nullptr, nullptr, nullptr);
+                if (!state) {
+                    throw std::runtime_error("Failed to create Brotli decoder");
+                }
+
+                try {
+                    uint8_t buffer[65536];
+                    while (true) {
+                        size_t available_out = sizeof(buffer);
+                        uint8_t* next_out = buffer;
+
+                        BrotliDecoderResult result = BrotliDecoderDecompressStream(
+                            state, &available_in, &next_in,
+                            &available_out, &next_out, nullptr);
+
+                        size_t bytes_written = next_out - buffer;
+                        if (bytes_written > 0) {
+                            output.append(reinterpret_cast<char*>(buffer), bytes_written);
+                        }
+
+                        if (result == BROTLI_DECODER_RESULT_SUCCESS) {
+                            break;
+                        }
+                        if (result == BROTLI_DECODER_RESULT_ERROR) {
+                            throw std::runtime_error("Brotli decompression failed");
+                        }
+                        if (result == BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT) {
+                            break;
+                        }
+                    }
+
+                    final_body = std::move(output);
+                } catch (...) {
+                    BrotliDecoderDestroyInstance(state);
+                    throw;
+                }
+
+                BrotliDecoderDestroyInstance(state);
+            } else if (encoding == "gzip") {
+                final_body = decompress_gzip(raw_body);
+            } else if (encoding == "deflate") {
+                final_body = decompress_deflate(raw_body);
             }
         }
 
-        // Handle compression if present
-        if (!response_body.empty()) {
-            auto content_encoding = response_headers.find("Content-Encoding");
-            if (content_encoding != response_headers.end()) {
-                if (content_encoding->second.find("gzip") != std::string::npos) {
-                    response_body = decompress_gzip(response_body);
-                } else if (content_encoding->second.find("deflate") != std::string::npos) {
-                    response_body = decompress_deflate(response_body);
-                } else if (content_encoding->second.find("br") != std::string::npos) {
-                    // Note: Brotli support would need to be added here
-                } else if (content_encoding->second.find("bzip2") != std::string::npos) {
-                    response_body = decompress_bzip2(response_body);
-                }
-            }
-        }
+        // Reconstruct full response
+        response = headers + "\r\n\r\n" + final_body;
 
-        // Cleanup
-        if (zs) {
-            inflateEnd(zs);
-            delete zs;
-        }
-        if (bzs) {
-            BZ2_bzDecompressEnd(bzs);
-            delete bzs;
-        }
         if (ssl) SSL_free(ssl);
         close(sock);
-
-        // Construct final response
-        std::string final_response = header_block.substr(0, header_block.find("\r\n\r\n") + 4);
-        final_response += response_body;
         
-        return Response(final_response);
+        return Response(response);
     }
 
 private:
