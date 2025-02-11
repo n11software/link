@@ -6,6 +6,12 @@
 
 namespace Link {
 
+struct MultipartFile {
+    std::string filename;
+    std::string content_type;
+    std::string content;
+};
+
 class Request {
     public:
         Request(const std::string& request, std::string ip, std::string protocol);
@@ -27,6 +33,11 @@ class Request {
             }
             return raw_headers;
         }
+        const std::map<std::string, std::string>& getHeaders() const { return headers; }
+        const MultipartFile* getFile(const std::string& name) const {
+            auto it = files.find(name);
+            return it != files.end() ? &it->second : nullptr;
+        }
     private:
         std::string method, protocol;
         std::string url;
@@ -36,6 +47,9 @@ class Request {
         std::string ip;
         std::map<std::string, std::string> params; // Add path parameters
         CookieManager cookieManager;
+        std::map<std::string, MultipartFile> files;
+        void parseMultipartFormData(const std::string& boundary);
+        std::string extractBoundary(const std::string& content_type) const;
         friend class Server; // Allow Server to set params
 };
 } // namespace Link

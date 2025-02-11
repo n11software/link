@@ -381,26 +381,57 @@ void Server::Listen(int port) {
             inet_ntop(AF_INET, &addr.sin_addr, ip_str, INET_ADDRSTRLEN);
             std::string client_ip(ip_str);
             
-            // Read request with peek first to determine size
-            char peek_buffer[1];
-            int peek_result = recv(client_fd, peek_buffer, 1, MSG_PEEK);
-            if (peek_result <= 0) {
-                close(client_fd);
-                return;
+            // Read headers first
+            std::vector<char> buffer(8192);
+            std::string request_str;
+            size_t total_bytes = 0;
+            size_t content_length = 0;
+            bool headers_complete = false;
+            
+            while (!headers_complete) {
+                int bytes_read = is_https ? 
+                    SSL_read(ssl, buffer.data(), buffer.size()) :
+                    recv(client_fd, buffer.data(), buffer.size(), 0);
+                    
+                if (bytes_read <= 0) break;
+                
+                request_str.append(buffer.data(), bytes_read);
+                total_bytes += bytes_read;
+                
+                // Check if we have complete headers
+                size_t header_end = request_str.find("\r\n\r\n");
+                if (header_end != std::string::npos) {
+                    headers_complete = true;
+                    
+                    // Parse Content-Length
+                    size_t cl_pos = request_str.find("Content-Length: ");
+                    if (cl_pos != std::string::npos) {
+                        size_t cl_end = request_str.find("\r\n", cl_pos);
+                        if (cl_end != std::string::npos) {
+                            std::string cl_str = request_str.substr(cl_pos + 16, cl_end - (cl_pos + 16));
+                            content_length = std::stoul(cl_str);
+                        }
+                    }
+                }
+            }
+            
+            // If we have a content length, keep reading until we get all the data
+            if (content_length > 0) {
+                size_t body_received = request_str.length() - request_str.find("\r\n\r\n") - 4;
+                
+                while (body_received < content_length) {
+                    int bytes_read = is_https ? 
+                        SSL_read(ssl, buffer.data(), buffer.size()) :
+                        recv(client_fd, buffer.data(), buffer.size(), 0);
+                        
+                    if (bytes_read <= 0) break;
+                    
+                    request_str.append(buffer.data(), bytes_read);
+                    body_received += bytes_read;
+                }
             }
 
-            // Now read the actual request
-            std::vector<char> buffer(8192); // Larger buffer
-            std::string request_str;
-            
-            int bytes_read = is_https ? 
-                SSL_read(ssl, buffer.data(), buffer.size()) :
-                recv(client_fd, buffer.data(), buffer.size(), 0);
-
-            if (bytes_read > 0) {
-                // Create a string with explicit length to handle any null bytes
-                request_str = std::string(buffer.data(), bytes_read);
-
+            if (!request_str.empty()) {
                 // Process request
                 Request req(request_str, client_ip, is_https ? "https" : "http");
                 Response res;

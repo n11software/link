@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include <fstream>
+#include <filesystem>
 
 // Mock server for local testing
 void runMockServer(int port) {
@@ -23,6 +24,28 @@ void runMockServer(int port) {
     
     server.Delete("/test", [](const Link::Request& req, Link::Response& res) {
         res.send("DELETE response");
+    });
+    
+    // Add file upload endpoint
+    server.Post("/upload", [](const Link::Request& req, Link::Response& res) {
+        const auto* file = req.getFile("file");
+        if (file) {
+            std::filesystem::create_directories("test/upload");
+            std::string fileName = "test/upload/uploaded_file.txt";
+            std::ofstream outFile(fileName, std::ios::binary);
+            if (outFile) {
+                outFile.write(file->content.c_str(), file->content.length());
+                outFile.close();
+                std::cout << "Wrote " << file->content.length() << " bytes to file" << std::endl;
+                res.json("{\"status\":\"success\",\"message\":\"File uploaded successfully\"}");
+            } else {
+                res.status(500);
+                res.json("{\"status\":\"error\",\"message\":\"Failed to save file\"}");
+            }
+        } else {
+            res.status(400);
+            res.json("{\"status\":\"error\",\"message\":\"No file found in request\"}");
+        }
     });
     
     try {
@@ -60,6 +83,60 @@ void testHttpClient() {
         response = client.Delete("http://localhost:" + std::to_string(TEST_PORT) + "/test");
         assert(response.isSent() && "Response should be marked as sent");
         std::cout << "✓ Local DELETE request successful" << std::endl;
+
+        // Test file upload
+        std::cout << "\nTesting file upload..." << std::endl;
+        
+        // Create a test file
+        const std::string testContent = "This is a test file content for upload testing.";
+        std::ofstream testFile("test/test_upload.txt");
+        testFile.write(testContent.c_str(), testContent.length());
+        testFile.close();
+        
+        // Read the file content
+        std::ifstream inFile("test/test_upload.txt", std::ios::binary);
+        std::string fileContent((std::istreambuf_iterator<char>(inFile)),
+                               std::istreambuf_iterator<char>());
+        inFile.close();
+        
+        // Upload the file
+        std::string boundary = "----WebKitFormBoundaryABC123";
+        std::string body = "--" + boundary + "\r\n"
+                          "Content-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\r\n"
+                          "Content-Type: text/plain\r\n\r\n" +
+                          fileContent + "\r\n--" + boundary + "--\r\n";
+
+        client.clearHeaders();
+        client.setHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+        client.setHeader("Content-Length", std::to_string(body.length()));
+        
+        std::cout << "\n=== CLIENT SENDING REQUEST ===\n";
+        auto uploadResponse = client.Post("http://localhost:" + std::to_string(TEST_PORT) + "/upload", body);
+        std::cout << "===========================\n\n";
+        
+        std::cout << "Sending file content with length: " << fileContent.length() << std::endl;
+        std::cout << "Content preview: " << fileContent.substr(0, 50) << std::endl;
+        
+        // Add response status check
+        std::cout << "Upload response status: " << uploadResponse.getStatusCode() << std::endl;
+        std::cout << "Upload response body: " << uploadResponse.getBody() << std::endl;
+        
+        // Verify the uploaded file
+        std::ifstream uploadedFile("test/upload/uploaded_file.txt", std::ios::binary);
+        std::string uploadedContent((std::istreambuf_iterator<char>(uploadedFile)),
+                                   std::istreambuf_iterator<char>());
+        uploadedFile.close();
+        
+        std::cout << "Original content length: " << testContent.length() << std::endl;
+        std::cout << "Uploaded content length: " << uploadedContent.length() << std::endl;
+        
+        assert(uploadedContent == testContent && "Uploaded file content should match original");
+        std::cout << "✓ File upload test successful" << std::endl;
+        
+        // Clean up test files
+        std::filesystem::remove("test/test_upload.txt");
+        // std::filesystem::remove("test/upload/uploaded_file.txt");
+        // std::filesystem::remove("test/upload/");
 
         // Optional: Test external endpoints (disabled by default)
         bool test_external = true;
