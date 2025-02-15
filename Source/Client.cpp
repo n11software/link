@@ -15,6 +15,7 @@
 #include <bzlib.h>
 #include <chrono>  // Add this for timing
 #include <brotli/decode.h>
+#include <cstring>
 
 namespace Link {
 
