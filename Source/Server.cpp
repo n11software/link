@@ -350,27 +350,30 @@ void Server::Listen(int port) {
         throw std::runtime_error("Listen failed");
     }
 
-
-    // Server loop
     while (true) {
         int client_fd = accept(impl->server_fd, nullptr, nullptr);
         if (client_fd < 0) continue;
 
-        // Create SSL object if needed
-        SSL* ssl = SSL_new(impl->ctx);
-        if (!ssl) {
-            close(client_fd);
-            continue;
-        }
-        if (SSL_set_fd(ssl, client_fd) != 1) {
-            SSL_free(ssl);
-            close(client_fd);
-            continue;
-        }
-        int ret = SSL_accept(ssl);
-        bool is_https = (ret > 0);
+        std::thread([this, client_fd]() {
+            std::vector<char> probe(5);
+            int n = recv(client_fd, probe.data(), probe.size(), MSG_PEEK);
+            if (n <= 0) {
+                close(client_fd);
+                return;
+            }
+            bool is_tls = (n >= 5 && static_cast<unsigned char>(probe[0]) == 0x16 &&
+                                          static_cast<unsigned char>(probe[1]) == 0x03);
+            SSL* ssl = nullptr;
+            if (is_tls) {
+                ssl = SSL_new(impl->ctx);
+                SSL_set_fd(ssl, client_fd);
+                if (SSL_accept(ssl) <= 0) {
+                    SSL_free(ssl);
+                    close(client_fd);
+                    return;
+                }
+            }
 
-        std::thread([this, client_fd, ssl, is_https]() {
             auto start = std::chrono::high_resolution_clock::now();
             
             // Get client IP
@@ -389,7 +392,7 @@ void Server::Listen(int port) {
             bool headers_complete = false;
             
             while (!headers_complete) {
-                int bytes_read = is_https ? 
+                int bytes_read = is_tls ? 
                     SSL_read(ssl, buffer.data(), buffer.size()) :
                     recv(client_fd, buffer.data(), buffer.size(), 0);
                     
@@ -420,7 +423,7 @@ void Server::Listen(int port) {
                 size_t body_received = request_str.length() - request_str.find("\r\n\r\n") - 4;
                 
                 while (body_received < content_length) {
-                    int bytes_read = is_https ? 
+                    int bytes_read = is_tls ? 
                         SSL_read(ssl, buffer.data(), buffer.size()) :
                         recv(client_fd, buffer.data(), buffer.size(), 0);
                         
@@ -433,7 +436,7 @@ void Server::Listen(int port) {
 
             if (!request_str.empty()) {
                 // Process request
-                Request req(request_str, client_ip, is_https ? "https" : "http");
+                Request req(request_str, client_ip, is_tls ? "https" : "http");
                 Response res;
 
                 // Route handling
@@ -472,7 +475,7 @@ void Server::Listen(int port) {
                 }
 
                 std::string response = res.serialize();
-                if (is_https) {
+                if (is_tls) {
                     SSL_write(ssl, response.c_str(), response.length());
                 } else {
                     send(client_fd, response.c_str(), response.length(), 0);
@@ -487,7 +490,7 @@ void Server::Listen(int port) {
                         Color::Yellow << " > " << impl->metrics.format_duration(duration.count()) << Color::Reset << std::endl;
                 }
             }
-            if (is_https) SSL_free(ssl);
+            if (is_tls) SSL_free(ssl);
             close(client_fd);
         }).detach();
     }
