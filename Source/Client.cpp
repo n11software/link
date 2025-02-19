@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <fstream>  // Add this for ofstream
+#include <iomanip>  // Add this for setprecision, setw, etc.
 #include <zlib.h>
 #include <bzlib.h>
 #include <chrono>  // Add this for timing
