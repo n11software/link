@@ -19,6 +19,55 @@
 
 namespace Link {
 
+struct RequestMetrics {
+    std::chrono::microseconds dns_resolution{0};
+    std::chrono::microseconds socket_creation{0};
+    std::chrono::microseconds connection_time{0};
+    std::chrono::microseconds ssl_handshake{0};
+    std::chrono::microseconds request_send{0};
+    std::chrono::microseconds waiting_time{0};
+    std::chrono::microseconds response_download{0};
+    std::chrono::microseconds decompression{0};
+    std::chrono::microseconds total_time{0};
+    std::chrono::microseconds ssl_init{0};  // Add this field
+    
+    void print() const {
+        struct MetricEntry {
+            std::string name;
+            std::chrono::microseconds duration;
+        };
+        
+        std::vector<MetricEntry> metrics = {
+            {"SSL Init", ssl_init},  // Add this entry
+            {"DNS Resolution", dns_resolution},
+            {"Socket Creation", socket_creation},
+            {"Connection Time", connection_time},
+            {"SSL Handshake", ssl_handshake},
+            {"Request Send", request_send},
+            {"Server Processing", waiting_time},
+            {"Response Download", response_download},
+            {"Decompression", decompression},
+            {"Total Time", total_time}
+        };
+        
+        std::sort(metrics.begin(), metrics.end(),
+            [](const MetricEntry& a, const MetricEntry& b) {
+                return a.duration > b.duration;
+            });
+        
+        std::cout << "\n=== Request Performance Metrics ===\n";
+        for (const auto& metric : metrics) {
+            if (metric.duration.count() > 0) {
+                double ms = metric.duration.count() / 1000.0;
+                std::cout << std::fixed << std::setprecision(2)
+                         << std::setw(20) << std::left << metric.name 
+                         << ": " << ms << "ms\n";
+            }
+        }
+        std::cout << "================================\n";
+    }
+};
+
 class Client::ClientImpl {
 public:
     bool enableSSL;
@@ -27,8 +76,12 @@ public:
     std::map<std::string, std::string> headers;
     SSL_CTX* ctx;
     std::string lastRequest;
+    RequestMetrics metrics; // Changed from last_metrics to just metrics
+    bool metricsEnabled{false};  // Add this near other boolean members
 
     ClientImpl(bool ssl) : enableSSL(ssl), verifyPeer(true), timeout(30), ctx(nullptr) {
+        auto ssl_start = std::chrono::high_resolution_clock::now();
+        
         if (enableSSL) {
             // Initialize OpenSSL only once
             static bool initialized = false;
@@ -57,6 +110,13 @@ public:
                     SSL_CTX_load_verify_locations(ctx, "/etc/ssl/cert.pem", "/private/etc/ssl/certs");
                 }
             }
+        }
+        
+        metrics.ssl_init = std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now() - ssl_start);
+            
+        if (metricsEnabled) {
+            metrics.print();
         }
     }
 
@@ -203,6 +263,8 @@ public:
     }
 
     Response sendRequest(const std::string& method, const std::string& url, const std::string& request_body = "") {
+        auto total_start = metricsEnabled ? std::chrono::high_resolution_clock::now() : std::chrono::high_resolution_clock::time_point{};
+        metrics = RequestMetrics();
         URL parsedUrl(url);
         headers["Accept-Encoding"] = "gzip, deflate, br, bzip2";
         lastRequest = buildFullRequest(method, parsedUrl, request_body);
@@ -210,16 +272,26 @@ public:
         bool useSSL = enableSSL && (parsedUrl.getScheme() == "https" || parsedUrl.getProtocol() == "https");
         int port = parsedUrl.getPort().empty() ? (useSSL ? 443 : 80) : std::stoi(parsedUrl.getPort());
 
-        // Resolve host
+        // DNS Resolution
+        auto dns_start = metricsEnabled ? std::chrono::high_resolution_clock::now() : total_start;
         struct hostent* host = gethostbyname(parsedUrl.getHost().c_str());
         if (!host) {
             throw std::runtime_error("Failed to resolve host: " + parsedUrl.getHost());
         }
+        if (metricsEnabled) {
+            metrics.dns_resolution = std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::high_resolution_clock::now() - dns_start);
+        }
 
-        // Create socket
+        // Socket Creation
+        auto socket_start = metricsEnabled ? std::chrono::high_resolution_clock::now() : total_start;
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
             throw std::runtime_error("Failed to create socket");
+        }
+        if (metricsEnabled) {
+            metrics.socket_creation = std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::high_resolution_clock::now() - socket_start);
         }
 
         // Add TCP_NODELAY to disable Nagle's algorithm
@@ -233,7 +305,8 @@ public:
         setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
         setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 
-        // Connect
+        // Connection
+        auto connect_start = metricsEnabled ? std::chrono::high_resolution_clock::now() : total_start;
         struct sockaddr_in server_addr = {};
         server_addr.sin_family = AF_INET;
         server_addr.sin_port = htons(port);
@@ -243,10 +316,15 @@ public:
             close(sock);
             throw std::runtime_error("Connection failed");
         }
+        if (metricsEnabled) {
+            metrics.connection_time = std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::high_resolution_clock::now() - connect_start);
+        }
 
         // SSL handshake if needed
         SSL* ssl = nullptr;
         if (useSSL && ctx) {
+            auto ssl_start = metricsEnabled ? std::chrono::high_resolution_clock::now() : total_start;
             ssl = SSL_new(ctx);
             if (!ssl) {
                 close(sock);
@@ -278,22 +356,27 @@ public:
                 }
                 X509_free(cert);
             }
+            if (metricsEnabled) {
+                metrics.ssl_handshake = std::chrono::duration_cast<std::chrono::microseconds>(
+                    std::chrono::high_resolution_clock::now() - ssl_start);
+            }
         }
 
-        // Send request with error checking
+        // Send request
+        auto send_start = metricsEnabled ? std::chrono::high_resolution_clock::now() : total_start;
         ssize_t sent;
         if (useSSL) {
             sent = SSL_write(ssl, lastRequest.c_str(), lastRequest.length());
         } else {
             sent = send(sock, lastRequest.c_str(), lastRequest.length(), 0);
         }
-        
-        if (sent <= 0) {
-            if (ssl) SSL_free(ssl);
-            close(sock);
-            throw std::runtime_error("Failed to send request");
+        if (metricsEnabled) {
+            metrics.request_send = std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::high_resolution_clock::now() - send_start);
         }
-
+        
+        // Response download
+        auto download_start = metricsEnabled ? std::chrono::high_resolution_clock::now() : total_start;
         std::vector<char> buffer(32768);
         std::string response;
         response.reserve(65536);
@@ -394,6 +477,10 @@ public:
         } else {
             raw_body = response.substr(header_end + 4);
         }
+        if (metricsEnabled) {
+            metrics.response_download = std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::high_resolution_clock::now() - download_start);
+        }
 
         // Handle content encoding
         std::string final_body = raw_body;
@@ -405,6 +492,7 @@ public:
             // Remove all whitespace from encoding string
             encoding.erase(std::remove_if(encoding.begin(), encoding.end(), ::isspace), encoding.end());
             
+            auto decompress_start = metricsEnabled ? std::chrono::high_resolution_clock::now() : total_start;
             if (encoding == "br") {
                 const uint8_t* next_in = reinterpret_cast<const uint8_t*>(raw_body.data());
                 size_t available_in = raw_body.size();
@@ -454,6 +542,10 @@ public:
             } else if (encoding == "deflate") {
                 final_body = decompress_deflate(raw_body);
             }
+            if (metricsEnabled) {
+                metrics.decompression = std::chrono::duration_cast<std::chrono::microseconds>(
+                    std::chrono::high_resolution_clock::now() - decompress_start);
+            }
         }
 
         // Reconstruct full response
@@ -462,6 +554,19 @@ public:
         if (ssl) SSL_free(ssl);
         close(sock);
         
+        if (metricsEnabled) {
+            metrics.total_time = std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::high_resolution_clock::now() - total_start);
+            
+            metrics.waiting_time = metrics.total_time - 
+                (metrics.dns_resolution + metrics.socket_creation + 
+                 metrics.connection_time + metrics.ssl_handshake + 
+                 metrics.request_send + metrics.response_download + 
+                 metrics.decompression);
+                 
+            metrics.print();
+        }
+
         return Response(response);
     }
 
@@ -528,6 +633,11 @@ std::string Client::getHeadersRaw() const {
 
 std::string Client::getLastRequestRaw() const {
     return impl->lastRequest;
+}
+
+Client& Client::enableMetrics(bool enable) {
+    impl->metricsEnabled = enable;
+    return *this;
 }
 
 } // namespace Link

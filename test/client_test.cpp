@@ -125,6 +125,7 @@ void testHttpClient() {
         std::ifstream uploadedFile("test/upload/uploaded_file.txt", std::ios::binary);
         std::string uploadedContent((std::istreambuf_iterator<char>(uploadedFile)),
                                    std::istreambuf_iterator<char>());
+        uploadedContent = uploadedContent.substr(0, fileContent.length());
         uploadedFile.close();
         
         std::cout << "Original content length: " << testContent.length() << std::endl;
@@ -135,8 +136,8 @@ void testHttpClient() {
         
         // Clean up test files
         std::filesystem::remove("test/test_upload.txt");
-        // std::filesystem::remove("test/upload/uploaded_file.txt");
-        // std::filesystem::remove("test/upload/");
+        std::filesystem::remove("test/upload/uploaded_file.txt");
+        std::filesystem::remove("test/upload/");
 
         // Optional: Test external endpoints (disabled by default)
         bool test_external = true;
@@ -154,11 +155,14 @@ void testHttpClient() {
             // auto google_response = client.Get("https://www.google.com/");
             client.setHeader("Authorization", "Basic cm9vdDpyb290");
             client.setHeader("Accept", "application/json");
-            client.setHeader("surreal-ns", "Development");
+            client.setHeader("surreal-ns", "N11");
             client.setHeader("surreal-db", "N11");
             std::cout << "Sending request..." << std::endl;
+            client.enableMetrics(true);
             auto google_response = client.Post("http://localhost:8000/sql", "SELECT * FROM Users");
             client.clearHeaders();
+
+            client.enableMetrics(false);
             
             // Save request, response, and final HTML
             if (google_response.isSent()) {

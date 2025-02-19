@@ -27,6 +27,9 @@ public:
     std::string getHeadersRaw() const;
     std::string getLastRequestRaw() const;  // Add this method
 
+    // Add metrics control
+    Client& enableMetrics(bool enable = true);
+
 private:
     class ClientImpl;
     std::unique_ptr<ClientImpl> impl;

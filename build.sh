@@ -69,7 +69,7 @@ print_status() {
 }
 
 # Add compression libraries to linking
-LIBS="-lssl -lcrypto -lz -lbz2 -lbrotlidec"
+LIBS="-lssl -lcrypto -lz -lbz2 -lbrotlidec -lbrotlidec"
 
 # Compile library source files
 for source_file in Source/*.cpp; do
